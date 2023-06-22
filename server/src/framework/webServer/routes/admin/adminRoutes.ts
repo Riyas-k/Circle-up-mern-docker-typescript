@@ -6,8 +6,6 @@ import { adminDbRepository } from '../../../../application/repositories/admin/ad
 import { adminRepositoryMongodb } from '../../../database/mongodb/repositories/admin/adminAuthRepository';
 import { userDbRepository } from '../../../../application/repositories/user/userRepositoryInf';
 import { userRepositoryMongoDB } from '../../../database/mongodb/repositories/user/userAuthRepositoryImp';
-import { AuthServiceInterface } from '../../../../application/services/user/userAuthServiceInt';
-import {authServices } from '../../../services/user/userAuthServiceImp';
 import userControllers from '../../../../adapters/controller/user/userController';
 
 

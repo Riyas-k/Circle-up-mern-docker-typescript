@@ -18,15 +18,19 @@ import {
   loginSuccess,
   userBlocked,
 } from "../../../redux/loginReducers";
-import {  auth,provider } from "../../../firebase/config";
+import { auth, provider } from "../../../firebase/config";
 import { signInWithPopup } from "firebase/auth";
 import { setUserDetails } from "../../../redux/singlereducer";
+
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import IconButton from "@mui/material/IconButton";
 
 export default function SignIn() {
   const userAuth = useSelector((state) => state.user.payload);
   React.useEffect(() => {
     if (userAuth) {
-      console.log('hello');
+      console.log("hello");
       navigate("/");
     }
   }, []);
@@ -50,8 +54,8 @@ export default function SignIn() {
       // Handle form submission
       await axios.post("/sign-in", values).then((response) => {
         if (response.data.status) {
-          localStorage.setItem('user',response.data.token)
-          dispatch(setUserDetails({ payload: response.data.userExist }));
+          localStorage.setItem("user", response.data.token);
+          dispatch(setUserDetails({ payload: response.data }));
           dispatch(loginSuccess());
           navigate("/");
         } else if (response.data.blocked) {
@@ -63,19 +67,24 @@ export default function SignIn() {
     },
   });
 
-  const handleGoogleSignIn = () => {
-     signInWithPopup(auth, provider)
-      .then((result) => {
-        // Handle successful sign-in
-        console.log(result);
-        // dispatch(setUserDetails({payload:result.user.refreshToken}))
-        // navigate('/')
-      })
-      .catch((error) => {
-        // Handle sign-in errors
-        console.log(error);
+  const handleGoogleSignIn = async () => {
+    try {
+      const data = await signInWithPopup(auth, provider);
+      // Handle successful sign-in
+      const email = data.user.email;
+      await axios.get(`/verify-google-user/${email}`).then((res) => {
+        console.log(res.data.data.status);
+        if (res.data.data.status) {
+          dispatch(setUserDetails({ payload: res.data.data.isEmailExist }));
+          navigate("/");
+        }
       });
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  const [showPassword, setShowPassword] = React.useState(false);
 
   return (
     <Container
@@ -91,8 +100,7 @@ export default function SignIn() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-        
-        }}  
+        }}
       >
         {error && (
           <Alert variant="filled" severity="error">
@@ -135,7 +143,7 @@ export default function SignIn() {
             fullWidth
             name="password"
             label="Password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
             autoComplete="current-password"
             value={formik.values.password}
@@ -143,6 +151,16 @@ export default function SignIn() {
             onBlur={formik.handleBlur}
             error={formik.touched.password && formik.errors.password}
             helperText={formik.touched.password && formik.errors.password}
+            InputProps={{
+              endAdornment: (
+                <IconButton sx={{color:'black'}}
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              ),
+            }}
           />
 
           <Button
@@ -158,7 +176,8 @@ export default function SignIn() {
                 to="/sign-up"
                 style={{ textDecoration: "none", color: "black" }}
               >
-                Dont have an account? <span style={{color:'blue'}}>Sign up</span> 
+                Dont have an account?{" "}
+                <span style={{ color: "blue" }}>Sign up</span>
               </Link>
             </Grid>
           </Grid>
@@ -170,6 +189,7 @@ export default function SignIn() {
                 src="https://onymos.com/wp-content/uploads/2020/10/google-signin-button.png"
                 alt="Google Sign In"
                 style={{ width: "100%", height: 50, cursor: "pointer" }}
+                crossOrigin="true"
               />
             </Grid>
           </Grid>

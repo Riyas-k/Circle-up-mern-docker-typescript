@@ -31,33 +31,47 @@ export const userLogin = async (
   userRepository: ReturnType<UserDbInterface>,
   authService: ReturnType<AuthServiceInterface>
 ) => {
-    let userExist:any = await userRepository.getUserValid(user.email)
-    if(!userExist){
-        return {status:false};
-    }
-    let checkPassword = await authService.comparePassword(user.password,userExist.password)
-    const token = await authService.generateToken("1234567890".toString());
-    if(checkPassword){
-        return {status:true,userExist,token}
-    }else{
-        return {status:false}
-    }
+  let userExist: any = await userRepository.getUserValid(user.email);
+  if (!userExist) {
+    return { status: false };
+  }
+  let checkPassword = await authService.comparePassword(
+    user.password,
+    userExist.password
+  );
+  const token = await authService.generateToken("1234567890".toString());
+  if (checkPassword) {
+    return { status: true, userExist, token };
+  } else {
+    return { status: false };
+  }
 };
 
-export const addUser = async( user: { email: string; photoURL: string,displayName:string },
-    userRepository: ReturnType<UserDbInterface>,
-    authService: ReturnType<AuthServiceInterface>)=>{
-        // user.email = user.email.toLowerCase();
-        const isEmailExist: any = await userRepository.getUserByEmail(user.email);
-        if (isEmailExist) {
-          return { status: false };
-        }
-        let newUser:any = await userRepository.newUserGoogle(user)
-        if(newUser){
-          const { _id: userId } = await userRepository.addUser(user);
+export const addUser = async (
+  user: { email: string; photoURL: string; displayName: string },
+  userRepository: ReturnType<UserDbInterface>,
+  authService: ReturnType<AuthServiceInterface>
+) => {
+  // user.email = user.email.toLowerCase();
+  const isEmailExist: any = await userRepository.getUserByEmail(user.email);
+  if (isEmailExist) {
+    return { status: false };
+  }
+  let newUser: any = await userRepository.newUserGoogle(user);
+  if (newUser) {
+    const { _id: userId } = await userRepository.addUser(user);
 
-          const token = await authService.generateToken(userId.toString());
-          return {status:true,token}
-        }
-        return { status: false };
-    }
+    const token = await authService.generateToken(userId.toString());
+    return { status: true, token };
+  }
+  return { status: false };
+};
+
+export const checkUser = async(email:string,userRepository:ReturnType<UserDbInterface>,authService: ReturnType<AuthServiceInterface>)=>{
+    const isEmailExist:any = await userRepository.getUserByEmail(email)
+     if(isEmailExist){
+      return {status:true,isEmailExist}
+     }else{
+      return {status:false}
+     }
+}

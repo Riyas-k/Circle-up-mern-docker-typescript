@@ -11,12 +11,16 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import axios from "../../../axios/axios";
-import { Alert, Paper } from "@mui/material";
+import { Alert } from "@mui/material";
 import {auth,provider} from '../../../firebase/config';
 import { signInWithPopup } from "firebase/auth";
 import { useSelector } from "react-redux";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import IconButton from "@mui/material/IconButton";
 
 export default function SignUp() {
+  const [showPassword, setShowPassword] = React.useState(false);
   const userAuth = useSelector((state) => state.user.payload);
   React.useEffect(() => {
     if (userAuth) {
@@ -204,9 +208,19 @@ export default function SignUp() {
                 onBlur={formik.handleBlur}
                 error={formik.touched.password && formik.errors.password}
                 helperText={formik.touched.password && formik.errors.password}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={formik.values.password}
                 id="password"
+                InputProps={{
+                  endAdornment: (
+                    <IconButton sx={{color:'black'}}
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  ),
+                }}
               />
             </Grid>
           </Grid>

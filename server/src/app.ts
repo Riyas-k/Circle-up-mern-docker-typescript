@@ -12,7 +12,10 @@ import { HttpStatus } from "./types/httpstatuscodes";
 
 const app :Application = express();
 const server  = http.createServer(app);
-
+app.use((req, res, next) => {
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    next();
+  });
 //mongo
 connectDB();
 

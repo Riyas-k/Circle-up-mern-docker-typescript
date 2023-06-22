@@ -9,12 +9,12 @@ const persistConfig={
 
 const adminAuth = createSlice({
     name:'admin',
-    initialState:'',
+    initialState:[],
     reducers:{
         setAdmin:(state,action)=>{
             return action.payload
         },
-        clearAdmin:()=>''
+        clearAdmin:()=>[]
 
     }
 });
