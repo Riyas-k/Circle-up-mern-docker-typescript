@@ -4,13 +4,19 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import Button from "@mui/material/Button";
 import { Link } from "react-router-dom";
 import { Stack } from "@mui/material";
+import image from '../../assets/circle-Up.png'
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { useDispatch, useSelector } from "react-redux";
+import { setMode } from "../../redux/themeSlice";
 
 const AdminHeader = ({ toggleSidebar, handleLogout }) => {
+  const mode = useSelector((store)=>store.theme.mode)
+  const dispatch = useDispatch()
   return (
     <Stack direction='row' alignItems='center' sx={{position:'sticky',background:'#000',top:0,justifyContent:'space-between'}}>
 
@@ -26,15 +32,18 @@ const AdminHeader = ({ toggleSidebar, handleLogout }) => {
           >
             <MenuIcon sx={{ color: "black" }} />
           </IconButton>
-          <AccountCircleIcon
-            sx={{ mr: 2, color: "black", background: "white" }}
-          />
+          <img src={image} height='60px' alt="" />
           <Link to='/admin'style={{ textDecoration: "none", color: "black" }}>
-          <Typography variant="h6"  color="textPrimary" noWrap>
+          <Typography variant="h6"  color={mode==='light'&&'dark'} noWrap>
             Admin
           </Typography>
           </Link>
         </div>
+        {
+          mode === 'dark'?
+          <LightModeIcon sx={{color:'black'}}  onClick={()=>dispatch(setMode())}/>:
+          <DarkModeIcon onClick={()=>dispatch(setMode())}/>
+        }
         <Button
           sx={{ color: "black", "&:hover": { color: "blue" } }}
           onClick={handleLogout}

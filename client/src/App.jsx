@@ -9,12 +9,20 @@ import ViewUsersPage from "./pages/admin/ViewUsers";
 import ReportedPosts from "./pages/admin/ReportedPosts";
 import { useSelector } from "react-redux";
 // import SettingsPage from "./pages/user/Settings";
+import { CssBaseline,ThemeProvider } from "@mui/material";
+import { createTheme } from "@mui/material";
+import { themeSettings } from "./theme";
+import { useMemo } from "react";
 
 function App() {
   const adminAuth = useSelector((state)=>state.admin.payload)
   const auth = useSelector((state)=>state.user.payload)
+  const mode = useSelector((store)=>store.theme.mode)
+  const theme = useMemo(()=>createTheme(themeSettings(mode)),[mode])
   return (
-    <>
+    <div className="app">
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
       <Routes>
         {/* user */}
         <Route path="/sign-in" element={!auth? <SignIn />:<Navigate to='/'/>} />
@@ -32,7 +40,8 @@ function App() {
 
         <Route path="*" element={<Error />} />
       </Routes>
-    </>
+      </ThemeProvider>
+      </div>
   );
 }
 

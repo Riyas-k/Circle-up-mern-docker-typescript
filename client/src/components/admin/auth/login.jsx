@@ -11,14 +11,19 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "../../../axios/axios";
 import { useNavigate } from "react-router-dom";
-import { Alert } from "@mui/material";
+import { Alert, IconButton } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { loginFailure, loginSuccess } from "../../../redux/loginReducers";
 import { setAdmin } from "../../../redux/adminAuthReducer";
+import image from  '../../../assets/circle-Up.png'
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const defaultTheme = createTheme();
 
 export default function AdminLogin() {
+
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const error = useSelector((state) => state.login.error);
   const navigate = useNavigate();
@@ -56,11 +61,11 @@ export default function AdminLogin() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Container component="main" maxWidth="xs" sx={{border:'3px solid black',marginTop:'50px', borderRadius: "8px"}}>
+      <Container component="main" maxWidth="xs" sx={{border:'3px solid white',boxShadow:'20',marginTop:'60px', borderRadius: "8px"}}>
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
+            marginTop: 5,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -71,9 +76,7 @@ export default function AdminLogin() {
               Error Invalid Credentials!
             </Alert>
           )}
-          <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-
-          </Avatar>
+          <img src={image} height='80px' alt="" />
           <Typography component="h1" variant="h5">
             Admin Sign in
           </Typography>
@@ -103,19 +106,29 @@ export default function AdminLogin() {
               fullWidth
               name="password"
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               autoComplete="current-password"
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
+              InputProps={{
+                endAdornment: (
+                  <IconButton sx={{color:'black'}}
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ mt: 3, mb: 2,background:'green' }}
             >
               Sign In
             </Button>

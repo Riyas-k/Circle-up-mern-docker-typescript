@@ -18,6 +18,8 @@ import { useSelector } from "react-redux";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
+import image from  '../../../assets/circle-Up.png'
+
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -95,7 +97,7 @@ export default function SignUp() {
   });
 
   return (
-    <Container component="main" maxWidth="xs" sx={{border:'3px solid black',borderRadius:'8px',marginTop:'50px'}}>
+    <Container component="main" maxWidth="xs" sx={{border:'3px solid white',background:'white',boxShadow:'20',borderRadius:'8px'}}>
       <CssBaseline />
       <Box
         sx={{
@@ -105,13 +107,12 @@ export default function SignUp() {
           alignItems: "center",
         }}
       >
+        <img src={image} height='80px' alt="" />
         {state && (
           <Alert variant="filled" severity="error">
             Error Email Already Exist!
           </Alert>
         )}
-        <Avatar sx={{ m: 1, bgcolor: "black" }}>
-        </Avatar>
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
@@ -232,10 +233,10 @@ export default function SignUp() {
             >
               Sign Up
             </Button>
-          <Grid container justifyContent="flex-end">
+          <Grid container justifyContent="center">
             <Grid item sx={{marginBottom:'10px'}}>
               <Link to="/sign-in" variant="body2"  style={{ textDecoration: 'none', color: 'black' }}>
-                Already have an account?<span style={{color:'blue'}}>Sign in</span> 
+                Already have an account?<span style={{color:'green'}}>Sign in</span> 
               </Link>
             </Grid>
           </Grid>

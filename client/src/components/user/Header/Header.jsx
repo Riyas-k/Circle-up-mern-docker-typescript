@@ -20,7 +20,11 @@ import withReactContent from "sweetalert2-react-content";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUser } from "../../../redux/singlereducer";
+import image from '../../../assets/circle-Up.png'
 import { Stack } from "@mui/material";
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { setMode } from "../../../redux/themeSlice";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -70,6 +74,8 @@ export default function Header() {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const navigate = useNavigate();
+  const mode = useSelector((store)=>store.theme.mode)
+  const dispatch = useDispatch()
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -87,7 +93,6 @@ export default function Header() {
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
-  const dispatch = useDispatch()
 
   const handleLogout = () => {
     MySwal.fire({
@@ -166,7 +171,7 @@ export default function Header() {
   );
 
   return (
-    <Stack direction='row' alignItems='center' p={2} sx={{position:'sticky',background:'#000',top:0,justifyContent:'space-between'}}>
+    <Stack direction='row' alignItems='center' p={1} sx={{position:'sticky',background:'#000',top:0,justifyContent:'space-between'}}>
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" sx={{ backgroundColor: "white", color: "black", py: 1 }}>
         <Toolbar sx={{ paddingRight: { xs: 0, sm: 2 } }}>
@@ -181,14 +186,7 @@ export default function Header() {
           </IconButton>
 
           <Link to={"/"} style={{ textDecoration: "none", color: "black" }}>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{ display: { xs: "none", sm: "block" } }}
-            >
-              CIRCLE-UP
-            </Typography>
+          <img src={image} height='60px' alt="" />
           </Link>
 
           <Search
@@ -209,7 +207,11 @@ export default function Header() {
           </Search>
 
           <Box sx={{ flexGrow: 1 }} />
-
+          {
+          mode === 'dark'?
+          <LightModeIcon sx={{color:'black'}}  onClick={()=>dispatch(setMode())}/>:
+          <DarkModeIcon onClick={()=>dispatch(setMode())}/>
+        }
           <IconButton
             size="large"
             edge="end"
@@ -250,7 +252,7 @@ export default function Header() {
           >
             <AccountCircle /> 
             <Typography variant="body1" component="span" marginLeft={1}>
-        {user.firstName}
+        {user.firstName||user.userExist.firstName}
       </Typography>
           </IconButton>
           <IconButton

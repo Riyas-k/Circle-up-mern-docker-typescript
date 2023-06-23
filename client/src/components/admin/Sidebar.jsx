@@ -10,27 +10,33 @@ import ListItemText from "@mui/material/ListItemText";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import GroupIcon from "@mui/icons-material/Group";
 import PostAddIcon from "@mui/icons-material/PostAdd";
+import image from '../../assets/circle-Up.png'
+import { useSelector } from "react-redux";
+
+
+
+
+// eslint-disable-next-line react/prop-types
+const Sidebar = ({ isSidebarOpen, closeSidebar, navigate }) => {
+  const mode = useSelector((store)=>store.theme.mode)
 
 const SidebarOptions = [
   {
     text: "Dashboard",
-    icon: <DashboardIcon />,
+    icon: <DashboardIcon sx={mode=='dark'?{color:'white'}:{color:"black"}}/>,
     link: "/admin",
   },
   {
     text: "View Users",
-    icon: <GroupIcon />,
+    icon: <GroupIcon sx={mode=='dark'?{color:'white'}:{color:"black"}}/>,
     link: "/admin/view-users",
   },
   {
     text: "Reported Posts",
-    icon: <PostAddIcon />,
+    icon: <PostAddIcon sx={mode=='dark'?{color:'white'}:{color:"black"}}/>,
     link: "/admin/reported-posts",
   },
 ];
-
-// eslint-disable-next-line react/prop-types
-const Sidebar = ({ isSidebarOpen, closeSidebar, navigate }) => {
   return (
     <SwipeableDrawer
       anchor="left"
@@ -47,6 +53,10 @@ const Sidebar = ({ isSidebarOpen, closeSidebar, navigate }) => {
         <IconButton onClick={closeSidebar}>
           <ChevronLeftIcon />
         </IconButton>
+        {
+          mode==='light'&&
+          <img src={image} height='60px' style={{marginLeft:'100px'}} width='80px' alt="" />
+        }
         <Divider />
         <List>
           {SidebarOptions.map((option, index) => (

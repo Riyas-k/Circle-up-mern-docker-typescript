@@ -13,6 +13,7 @@ import * as Yup from "yup";
 import axios from "../../../axios/axios";
 import { Alert } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+import image from  '../../../assets/circle-Up.png'
 import {
   loginFailure,
   loginSuccess,
@@ -90,7 +91,7 @@ export default function SignIn() {
     <Container
       component="main"
       maxWidth="xs"
-      sx={{ border: "3px solid black", borderRadius: "8px", marginTop: "50px" }}
+      sx={{ border: "3px solid white",background:'white',boxShadow:'20', borderRadius: "8px", marginTop: "50px" }}
     >
       <CssBaseline />
 
@@ -112,7 +113,7 @@ export default function SignIn() {
             Blocked By Admin!
           </Alert>
         )}
-        <Avatar sx={{ m: 1, bgcolor: "black" }}></Avatar>
+       <img src={image} height='80px' alt="" />
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
@@ -170,14 +171,14 @@ export default function SignIn() {
           >
             Sign In
           </Button>
-          <Grid container justifyContent="flex-end">
+          <Grid container justifyContent="center">
             <Grid item sx={{ marginBottom: "20px" }}>
               <Link
                 to="/sign-up"
                 style={{ textDecoration: "none", color: "black" }}
               >
                 Dont have an account?{" "}
-                <span style={{ color: "blue" }}>Sign up</span>
+                <span style={{ color: "green" }}>Sign up</span>
               </Link>
             </Grid>
           </Grid>

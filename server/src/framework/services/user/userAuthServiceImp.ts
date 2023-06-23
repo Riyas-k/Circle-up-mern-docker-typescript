@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import configKeys from "../../../config/config";
+import { token } from "morgan";
 
 export const authServices = () => {
   const encryptPassword = async (password:string) => {
@@ -21,8 +22,14 @@ export const authServices = () => {
     return passwordMatch
       
   }
+  const verifyToken  = (token:string)=>{
+    if(configKeys.JWT_SECRET){
+      const isVerify = jwt.verify(token,configKeys.JWT_SECRET)
+      return isVerify
+    }
+  }
   return {
-    encryptPassword,generateToken,comparePassword
+    encryptPassword,generateToken,comparePassword,verifyToken
   }
 };
 

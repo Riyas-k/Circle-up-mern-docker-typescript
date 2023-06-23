@@ -3,13 +3,15 @@ import loginReducers from "./loginReducers";
 import userReducer from "./userSlice";
 import singleUser from './singlereducer';
 import AdminAuth from './adminAuthReducer';
+import themeReducer from './themeSlice'
 
 const store = configureStore({
     reducer:{
         login:loginReducers,
         users:userReducer,
         user:singleUser,
-        admin:AdminAuth
+        admin:AdminAuth,
+        theme:themeReducer
     }
 })
 export default store
