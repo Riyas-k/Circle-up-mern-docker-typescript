@@ -13,7 +13,7 @@ import * as Yup from "yup";
 import axios from "../../../axios/axios";
 import { Alert } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import image from  '../../../assets/circle-Up.png'
+import image from "../../../assets/circle-Up.png";
 import {
   loginFailure,
   loginSuccess,
@@ -26,15 +26,17 @@ import { setUserDetails } from "../../../redux/singlereducer";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
+// import { setUsers } from "../../../redux/userSlice";
 
 export default function SignIn() {
-  const userAuth = useSelector((state) => state.user.payload);
-  React.useEffect(() => {
-    if (userAuth) {
-      console.log("hello");
-      navigate("/");
-    }
-  }, []);
+  // const userAuth = useSelector((state) => state.user.payload);
+  // const Auth = useSelector((state) => state.user.payload);
+  // React.useEffect(() => {
+  //   if (userAuth && Auth.userExist.isBlock=='false') {
+  //     console.log("hello");
+  //     navigate("/");
+  //   }
+  // }, []);
 
   const dispatch = useDispatch();
   const error = useSelector((state) => state.login.error);
@@ -57,6 +59,7 @@ export default function SignIn() {
         if (response.data.status) {
           localStorage.setItem("user", response.data.token);
           dispatch(setUserDetails({ payload: response.data }));
+          // dispatch(setUsers({ payload: response.data }));
           dispatch(loginSuccess());
           navigate("/");
         } else if (response.data.blocked) {
@@ -74,7 +77,8 @@ export default function SignIn() {
       // Handle successful sign-in
       const email = data.user.email;
       await axios.get(`/verify-google-user/${email}`).then((res) => {
-        console.log(res.data.data.status);
+        console.log(res);
+        // console.log(res.data.data.status);
         if (res.data.data.status) {
           dispatch(setUserDetails({ payload: res.data.data.isEmailExist }));
           navigate("/");
@@ -85,13 +89,21 @@ export default function SignIn() {
     }
   };
 
+
+
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
     <Container
       component="main"
       maxWidth="xs"
-      sx={{ border: "3px solid white",background:'white',boxShadow:'20', borderRadius: "8px", marginTop: "50px" }}
+      sx={{
+        border: "3px solid white",
+        background: "white",
+        boxShadow: "20",
+        borderRadius: "8px",
+        marginTop: "50px",
+      }}
     >
       <CssBaseline />
 
@@ -113,7 +125,7 @@ export default function SignIn() {
             Blocked By Admin!
           </Alert>
         )}
-       <img src={image} height='80px' alt="" />
+        <img src={image} height="80px" alt="" />
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
@@ -154,7 +166,8 @@ export default function SignIn() {
             helperText={formik.touched.password && formik.errors.password}
             InputProps={{
               endAdornment: (
-                <IconButton sx={{color:'black'}}
+                <IconButton
+                  sx={{ color: "black" }}
                   onClick={() => setShowPassword(!showPassword)}
                   edge="end"
                 >
@@ -163,7 +176,8 @@ export default function SignIn() {
               ),
             }}
           />
-
+          <p style={{textAlign:'right',color:'blue'}}>
+            <Link  to="/forgot-password">Forgot Password</Link></p>
           <Button
             type="submit"
             variant="contained"

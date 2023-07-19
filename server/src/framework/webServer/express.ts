@@ -3,7 +3,7 @@ import morgan from "morgan";
 import CORS from "cors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import helmet from 'helmet'
+import helmet from "helmet";
 
 const expressConfig = (app: Application) => {
   const corsOptions = {
@@ -18,7 +18,7 @@ const expressConfig = (app: Application) => {
   //express middlewares
   app.use(CORS(corsOptions));
   app.use(helmet());
-  app.use(helmet.crossOriginResourcePolicy({policy:'cross-origin'}))
+  app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
   app.use(morgan("dev"));
   app.use(express.json());
   app.use(cookieParser());

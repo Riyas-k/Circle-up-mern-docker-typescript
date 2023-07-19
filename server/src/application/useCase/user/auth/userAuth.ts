@@ -67,11 +67,88 @@ export const addUser = async (
   return { status: false };
 };
 
-export const checkUser = async(email:string,userRepository:ReturnType<UserDbInterface>,authService: ReturnType<AuthServiceInterface>)=>{
-    const isEmailExist:any = await userRepository.getUserByEmail(email)
-     if(isEmailExist){
-      return {status:true,isEmailExist}
-     }else{
-      return {status:false}
-     }
+export const checkUser = async (
+  email: string,
+  userRepository: ReturnType<UserDbInterface>,
+  authService: ReturnType<AuthServiceInterface>
+) => {
+  const isEmailExist: any = await userRepository.getUserByEmail(email);
+  if (isEmailExist) {
+    return { status: true, isEmailExist };
+  } else {
+    return { status: false };
+  }
+};
+
+export const profileUpdate = async (
+  username: string,
+  name: string,
+  phoneNumber: number,
+  email: string,
+  location: string,
+  bio: string,
+  dp: string,
+  userId: string,
+  userRepository: ReturnType<UserDbInterface>,
+  authService: ReturnType<AuthServiceInterface>
+) => {
+  const updateUser: any = await userRepository.updateUser(
+    username,
+    name,
+    phoneNumber,
+    email,
+    location,
+    bio,
+    dp,
+    userId
+  );
+  return updateUser;
+};
+
+export const checkEmail = async (
+  email: string,
+  userRepository: ReturnType<UserDbInterface>,
+  authService: ReturnType<AuthServiceInterface>
+) => {
+  const emailCheck: any = await userRepository.correctEmail(email);
+  return emailCheck;
+};
+
+export const changePassword = async (
+  email: string,
+  password: string,
+  userRepository: ReturnType<UserDbInterface>,
+  authService: ReturnType<AuthServiceInterface>
+) => {
+  let encryptPassword = await authService.encryptPassword(password);
+  const details: any = await userRepository.changeNew(email, encryptPassword);
+  return details
+};
+
+export const getUserFetch = async(friendId:string,userRepository:ReturnType<UserDbInterface>)=>{
+  try {
+    const data = await userRepository.getUserById(friendId)
+    return data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const  getUserProfile = async(userId:string,userRepository:ReturnType<UserDbInterface>)=>{
+  try {
+    const data = await userRepository.getProfile(userId)
+    return data
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const getUserWithId = async(userId:string,userRepository:ReturnType<UserDbInterface>)=>{
+    try {
+      const data = await userRepository.getUserIdProfile(userId)
+      return data
+      
+    } catch (error) {
+      console.log(error);
+    }
 }

@@ -12,14 +12,13 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import axios from "../../../axios/axios";
 import { Alert } from "@mui/material";
-import {auth,provider} from '../../../firebase/config';
+import { auth, provider } from "../../../firebase/config";
 import { signInWithPopup } from "firebase/auth";
 import { useSelector } from "react-redux";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
-import image from  '../../../assets/circle-Up.png'
-
+import image from "../../../assets/circle-Up.png";
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -33,7 +32,7 @@ export default function SignUp() {
   const initialValues = {
     firstName: "",
     lastName: "",
-    UserName:"",
+    UserName: "",
     phone: "",
     email: "",
     password: "",
@@ -43,34 +42,34 @@ export default function SignUp() {
   const validationSchema = Yup.object({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
-    UserName:Yup.string().required('User Name is required'),
+    UserName: Yup.string().required("User Name is required"),
     phone: Yup.string().required("Phone No is required"),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
-    password: Yup.string().required("Password is required").min(6,"Password must be at least 6 characters"),
+    password: Yup.string()
+      .required("Password is required")
+      .min(6, "Password must be at least 6 characters"),
   });
-  const [value,setValue] = React.useState()
+  const [value, setValue] = React.useState();
   const handleGoogleSignIn = () => {
-    signInWithPopup(auth,provider).then(async(data)=>{
-        const {email,displayName,photoURL} = data.user
-        setValue({
-          email:email || '',
-          displayName:displayName || '',
-          photoURL:photoURL || ''
-        })
-      await axios.post('/google',value).then((response)=>{
+    signInWithPopup(auth, provider).then(async (data) => {
+      const { email, displayName, photoURL } = data.user;
+      setValue({
+        email: email || "",
+        displayName: displayName || "",
+        photoURL: photoURL || "",
+      });
+      await axios.post("/google", value).then((response) => {
         console.log(response);
         if (response.data.status) {
-
           navigate("/sign-in");
-        } else {  
-          console.log('else');
+        } else {
+          console.log("else");
           setState(true);
         }
-      
-      })
-    })
+      });
+    });
   };
 
   const onSubmit = async (values) => {
@@ -78,16 +77,14 @@ export default function SignUp() {
       await axios.post("/sign-up", values).then((response) => {
         console.log(response);
         if (response.data.status) {
-
           navigate("/sign-in");
-        } else {  
+        } else {
           setstate(true);
         }
       });
     } catch (error) {
       console.log(error);
     }
- 
   };
 
   const formik = useFormik({
@@ -97,7 +94,16 @@ export default function SignUp() {
   });
 
   return (
-    <Container component="main" maxWidth="xs" sx={{border:'3px solid white',background:'white',boxShadow:'20',borderRadius:'8px'}}>
+    <Container
+      component="main"
+      maxWidth="xs"
+      sx={{
+        border: "3px solid white",
+        background: "white",
+        boxShadow: "20",
+        borderRadius: "8px",
+      }}
+    >
       <CssBaseline />
       <Box
         sx={{
@@ -107,7 +113,7 @@ export default function SignUp() {
           alignItems: "center",
         }}
       >
-        <img src={image} height='80px' alt="" />
+        <img src={image} height="80px" alt="" />
         {state && (
           <Alert variant="filled" severity="error">
             Error Email Already Exist!
@@ -167,7 +173,6 @@ export default function SignUp() {
                 fullWidth
                 id="UserName"
                 label="User Name"
-                
               />
             </Grid>
             <Grid item xs={12}>
@@ -214,7 +219,8 @@ export default function SignUp() {
                 id="password"
                 InputProps={{
                   endAdornment: (
-                    <IconButton sx={{color:'black'}}
+                    <IconButton
+                      sx={{ color: "black" }}
                       onClick={() => setShowPassword(!showPassword)}
                       edge="end"
                     >
@@ -226,33 +232,36 @@ export default function SignUp() {
             </Grid>
           </Grid>
           <Button
-              type="submit"
- 
-              variant="contained"
-              sx={{ mt: 3, mb: 2,background:'green',ml:15, width:'150px' }}
-            >
-              Sign Up
-            </Button>
+            type="submit"
+            variant="contained"
+            sx={{ mt: 3, mb: 2, background: "green", ml: 15, width: "150px" }}
+          >
+            Sign Up
+          </Button>
           <Grid container justifyContent="center">
-            <Grid item sx={{marginBottom:'10px'}}>
-              <Link to="/sign-in" variant="body2"  style={{ textDecoration: 'none', color: 'black' }}>
-                Already have an account?<span style={{color:'green'}}>Sign in</span> 
+            <Grid item sx={{ marginBottom: "10px" }}>
+              <Link
+                to="/sign-in"
+                variant="body2"
+                style={{ textDecoration: "none", color: "black" }}
+              >
+                Already have an account?
+                <span style={{ color: "green" }}>Sign in</span>
               </Link>
             </Grid>
           </Grid>
-         
         </Box>
         <Grid container justifyContent="center" sx={{ marginBottom: "10px" }}>
-            <Grid item>
-              <Typography sx={{textAlign:'center'}}>OR</Typography>
-              <img
-                onClick={handleGoogleSignIn}
-                src="https://onymos.com/wp-content/uploads/2020/10/google-signin-button.png"
-                alt="Google Sign In"
-                style={{ width: "100%", height: 50,cursor:'pointer' }}
-              />
-            </Grid>
+          <Grid item>
+            <Typography sx={{ textAlign: "center" }}>OR</Typography>
+            <img
+              onClick={handleGoogleSignIn}
+              src="https://onymos.com/wp-content/uploads/2020/10/google-signin-button.png"
+              alt="Google Sign In"
+              style={{ width: "100%", height: 50, cursor: "pointer" }}
+            />
           </Grid>
+        </Grid>
       </Box>
     </Container>
   );

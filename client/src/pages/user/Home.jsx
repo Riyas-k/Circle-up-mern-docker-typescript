@@ -1,73 +1,72 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+// import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Header from "../../components/user/Header/Header";
-import Box from "@mui/material/Box";
-import Posts from "../../components/user/Posts";
-import PeopleYouMayKnow from "../../components/user/PeopleKnow";
-import ActiveNow from "../../components/user/ActiveNow";
+import FriendListWidget from "../../components/user/widgets/FriendListWidget";
+import MyPostWidget from "../../components/user/widgets/MyPostWidget";
+import PostsWidget from "../../components/user/widgets/PostsWidget";
+import UserWidget from "../../components/user/widgets/UserWidget";
+import { Box, useMediaQuery } from "@mui/material";
+import { useEffect, useState } from "react";
+// import { useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { userBlocked } from "../../redux/loginReducers";
+// import { useDispatch, useSelector } from "react-redux";
 
 function Home() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+  // const auth = useSelector((state) => state.login.blocked);
+  // console.log(auth,'hi');
+  // const dispatch = useDispatch()
+  //  const navigate = useNavigate()
+  // useEffect(()=>{
+  //   if(auth){
+  //     console.log('hi home');
+  //     dispatch(userBlocked())
+  //       navigate('/sign-in')
+  //   }
+  // })
+  const isNotMobile = useMediaQuery("(min-width:1000px)");
+  const data = useSelector((store) => store.user.payload);
+   console.log(data,'jo');
+  const {_id} = data
+  const {dp} = data
+  console.log(_id,dp,'home c');
+  const [click,setClick] = useState(false) 
 
-    window.addEventListener("resize", handleResize);
+  const details = useSelector((store)=>store.update.user)
+  console.log(details,'john');
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const handleClick = ()=>{
+    setClick(!click)
+  }
 
-  const handlePostScroll = (e) => {
-    // Prevent scrolling on parent elements
-    e.stopPropagation();
-  };
+  useEffect(()=>{
+  },[click])
 
   return (
     <>
       <Header />
       <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-        }}
+        width="100%"
+        padding="2rem 6%"
+        display={isNotMobile ? "flex" : "block"}
+        gap="0.5rem"
+        justifyContent="space-between"
       >
-        {!isMobile ? (
-          <>
-            <Posts onScroll={handlePostScroll} />
-            <Box
-              sx={{
-                display: "flex",
-                marginLeft: "5px",
-                flexDirection: "column",
-              }}
-            >
-              <Box
-                sx={{
-                  width: 500,
-                  height: 350,
-                  marginTop: "5px",
-                  backgroundColor: "#EFF2F1",
-                }}
-              >
-                <PeopleYouMayKnow />
-              </Box>
-              <Box
-                sx={{
-                  width: 500,
-                  height: 350,
-                  marginTop: "5px",
-                  backgroundColor: "#EFF2F1",
-                }}
-              >
-                <ActiveNow />
-              </Box>
-            </Box>
-          </>
-        ) : (
-          <Posts onScroll={handlePostScroll} />
-        )}
+        <Box flexBasis={isNotMobile ? "26%" : undefined}>
+          <UserWidget userId={_id}/>
+        </Box>
+        <Box
+          flexBasis={isNotMobile ? "45%" : undefined}
+          mt={isNotMobile ? undefined : "2rem"}
+        >
+          <MyPostWidget dp={dp}/>
+          <PostsWidget  click={click} userId={_id} dp={dp}/>
+
+        </Box>
+        {isNotMobile && <Box flexBasis="26%">
+             <FriendListWidget dp={dp}/>
+          </Box>}
       </Box>
     </>
   );

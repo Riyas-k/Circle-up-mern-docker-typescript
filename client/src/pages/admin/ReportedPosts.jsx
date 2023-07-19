@@ -20,6 +20,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import AdminHeader from "../../components/admin/AdminHeader";
 import Sidebar from "../../components/admin/Sidebar";
 import { useNavigate } from "react-router-dom";
+import Footer from "../../components/admin/Footer";
 
 // Mocked data for demonstration
 const reportedPostsData = [
@@ -140,6 +141,8 @@ const ReportedPosts = () => {
           </Table>
         </TableContainer>
       </Box>
+     <Footer />
+
     </>
   );
 };

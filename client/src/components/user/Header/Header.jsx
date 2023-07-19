@@ -11,20 +11,24 @@ import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import AddBoxIcon from "@mui/icons-material/AddBox";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import MessageIcon from "@mui/icons-material/Message";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { Link, useNavigate } from "react-router-dom";
-import HomeIcon from "@mui/icons-material/Home";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUser } from "../../../redux/singlereducer";
-import image from '../../../assets/circle-Up.png'
-import { Stack } from "@mui/material";
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+import image from "../../../assets/circle-Up.png";
+import { Stack, Tooltip } from "@mui/material";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import { setMode } from "../../../redux/themeSlice";
+import dark from "../../../assets/dark.png";
+import debounce from "lodash.debounce";
+import axios from '../../../axios/axios'
+import { useTheme } from "@emotion/react";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -36,6 +40,7 @@ const Search = styled("div")(({ theme }) => ({
   marginRight: theme.spacing(2),
   marginLeft: 0,
   width: "100%",
+  border: `1px solid ${theme.palette.mode === "dark" ? "grey" : "black"}`, // Add border property
   [theme.breakpoints.up("sm")]: {
     marginLeft: theme.spacing(3),
     width: "auto",
@@ -67,15 +72,18 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Header() {
-  const user = useSelector((state)=>state.user.payload)
+  const theme = useTheme();
+  const user = useSelector((state) => state.user.payload);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const MySwal = withReactContent(Swal);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const navigate = useNavigate();
-  const mode = useSelector((store)=>store.theme.mode)
-  const dispatch = useDispatch()
+  const mode = useSelector((store) => store.theme.mode);
+  const dispatch = useDispatch();
+  // const [text,setText] = React.useState('');
+  const [suggestions, setSuggestions] = React.useState([]);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -110,7 +118,7 @@ export default function Header() {
       if (result.isConfirmed) {
         // Perform delete operation
         localStorage.removeItem("token");
-        dispatch(clearUser())
+        dispatch(clearUser());
         navigate("/sign-in");
       }
     });
@@ -122,7 +130,7 @@ export default function Header() {
       anchorEl={anchorEl}
       anchorOrigin={{
         vertical: "top",
-        horizontal: "right",
+        horizontal: "right"
       }}
       id={menuId}
       keepMounted
@@ -132,9 +140,12 @@ export default function Header() {
       }}
       open={isMenuOpen}
       onClose={handleMenuClose}
+      sx={{marginTop:"30px"}}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleLogout} sx={{color:'red'}}>Logout</MenuItem>
+      {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
+      <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
+        Logout
+      </MenuItem>
     </Menu>
   );
 
@@ -156,7 +167,7 @@ export default function Header() {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <IconButton
+        {/* <IconButton
           size="large"
           aria-label="account of current user"
           aria-controls="primary-search-account-menu"
@@ -165,79 +176,178 @@ export default function Header() {
         >
           <SettingsIcon />
         </IconButton>
-        <Link style={{marginTop:'2px',textDecoration:'none',color:'black'}} to='/settings'>Settings</Link>
+        <Link
+          style={{
+            marginTop: "2px",
+            textDecoration: "none",
+            color: mode === "light" ? "black" : "white",
+          }}
+          to="/settings" 
+        >
+          Settings
+        </Link> */}
       </MenuItem>
     </Menu>
   );
+  const handleQueryChange = debounce(async (newQuery) => {
+    try {
+      console.log(newQuery,'mol');
+      const response = await axios.get(`/${newQuery}/search`)
+      console.log(response,'header search');
+      setSuggestions(response.data.data);
+      // setLoading(false);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      // setLoading(false);
+    }
+  }, 200);
+  
+  const searchUser = (event) => {
+    const inputValue = event.target.value;
+    handleQueryChange(inputValue);
+  };
+console.log(suggestions,'searched');
 
   return (
-    <Stack direction='row' alignItems='center' p={1} sx={{position:'sticky',background:'#000',top:0,justifyContent:'space-between'}}>
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ backgroundColor: "white", color: "black", py: 1 }}>
-        <Toolbar sx={{ paddingRight: { xs: 0, sm: 2 } }}>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          <Link to={"/"} style={{ textDecoration: "none", color: "black" }}>
-          <img src={image} height='60px' alt="" />
+    <Stack
+      direction="row"
+      alignItems="center"
+      sx={{
+        position: "sticky",
+        top: 0,
+        zIndex: 999,
+      }}
+    >
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: mode === "light" ? "white" : "black",
+          color: mode === "light" ? "black" : "white",
+          py: 1,
+        }}
+      >
+        <Toolbar>
+          <Link to={"/"} style={{ textDecoration: "none" }}>
+            <Box>
+              <img
+                src={mode === "light" ? image : dark}
+                height="60px"
+                style={{ marginRight: "10px" }}
+                alt="logo"
+              />
+            </Box>
           </Link>
 
-          <Search
-            sx={{
-              marginLeft: { xs: 0, sm: 2 },
-              border: "1px solid black",
-              width: { xs: "100%", sm: "auto" },
-              maxWidth: { xs: "none", sm: "none" },
-            }}
-          >
+          <Search>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-              placeholder="Search…"
+              placeholder="Search…" onKeyUp={searchUser} 
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
+          {Boolean(suggestions?.length) && (
+              <Box
+              sx={{
+                position: "absolute",
+                top: "80%",
+                left: "120px",
+                width: "18%",
+                backgroundColor: 'white',
+                borderRadius: "0.5rem",
+                boxShadow: theme.shadows[1],
+                mt: "0.25rem",
+                zIndex: 1,
+                overflowY: "auto",
+              }}
+            >
+                {suggestions?.map((suggestion) => (
+                    <Typography
+                      key={suggestion._id}
+                      onClick={() => {
+                        navigate(`/profile/${suggestion._id}`);
+                        // navigate(0); // to change url on friends friends profile
+                      }}
+                      sx={{
+                        py: "0.5rem",
+                        px: "1rem",
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: theme.palette.primary.light,
+                          color: theme.palette.background.default,
+                        },
+                      }}
+                    >
+                      {suggestion.UserName}
+                    </Typography>
+                  ))}
+                </Box>
+            )
+          }
 
           <Box sx={{ flexGrow: 1 }} />
-          {
-          mode === 'dark'?
-          <LightModeIcon sx={{color:'black'}}  onClick={()=>dispatch(setMode())}/>:
-          <DarkModeIcon onClick={()=>dispatch(setMode())}/>
-        }
+
+          {mode === "dark" ? (
+            <Tooltip title="Light Mode" placement="bottom">
+              <LightModeIcon
+                sx={{
+                  color: mode === "light" ? "black" : "white",
+                  cursor: "pointer",
+                }}
+                onClick={() => dispatch(setMode())}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip title="Dark Mode" placement="bottom">
+              <DarkModeIcon
+                sx={{
+                  color: mode === "light" ? "black" : "white",
+                  cursor: "pointer",
+                }}
+                onClick={() => dispatch(setMode())}
+              />
+            </Tooltip>
+          )}
+
           <IconButton
             size="large"
             edge="end"
             aria-label="account of current user"
             aria-haspopup="true"
             color="inherit"
-            sx={{ ml: 1,mt:-0 }}
+            sx={{ mt: -0 }}
           >
-            <AddBoxIcon />
-            <Typography
-              variant="body2"
-              sx={{ display: { xs: "none", sm: "block" }, ml: 0.5 }}
-            >
-              Add Post
-            </Typography>
+            <Tooltip title="Messages" placement="bottom">
+              <MessageIcon />
+            </Tooltip>
           </IconButton>
 
-          <Box sx={{ display: { xs: "none", md: "flex",marginTop:'-10px' } }}>
+          <Box
+            sx={{
+              display: {
+                xs: "none",
+                md: "flex",
+                marginTop: "-10px",
+                marginLeft: "2px",
+              },
+            }}
+          >
             <IconButton
               size="large"
               aria-label="show 4 new mails"
               color="inherit"
             >
-              <Link to="/" style={{ textDecoration: "none", color: "black" }}>
-                <HomeIcon />
-              </Link>
+              <Tooltip title="Notifications" placement="bottom">
+                <Link
+                  to="/"
+                  style={{ textDecoration: "none", color: "black" }}
+                >
+                  <NotificationsIcon
+                    sx={{ color: mode === "light" ? "black" : "white" }}
+                  />
+                </Link>
+              </Tooltip>
             </IconButton>
           </Box>
 
@@ -250,11 +360,12 @@ export default function Header() {
             onClick={handleProfileMenuOpen}
             color="inherit"
           >
-            <AccountCircle /> 
+            <AccountCircle />
             <Typography variant="body1" component="span" marginLeft={1}>
-        {user.firstName||user.userExist.firstName}
-      </Typography>
+              {user.firstName || user.userExist.firstName}
+            </Typography>
           </IconButton>
+
           <IconButton
             size="large"
             aria-label="show more"
@@ -269,7 +380,6 @@ export default function Header() {
       </AppBar>
       {renderMobileMenu}
       {renderMenu}
-    </Box>
     </Stack>
   );
 }

@@ -4,7 +4,9 @@ import { UserDbInterface } from "../../../application/repositories/user/userRepo
 import { userRepositoryMongoDB } from "../../../framework/database/mongodb/repositories/user/userAuthRepositoryImp";
 import {
   blockCurrUser,
+  getUserFetch,
   getAllUsers,
+  getUserData,
   unBlockCurrUser,
 } from "../../../application/useCase/user/auth/userDetails";
 
@@ -20,13 +22,18 @@ const userControllers = (
   const blockUser = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
     const status = await blockCurrUser(userId, dbRepositoryUser);
+    console.log(status, "===");
     res.json({ status });
   });
   const unBlockUser = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
     const status = await unBlockCurrUser(userId, dbRepositoryUser);
+    // const data = await getUserData(userId,dbRepositoryUser)
+    // console.log(data);
     res.json({ status });
   });
+
+
   return {
     getUsers,
     blockUser,

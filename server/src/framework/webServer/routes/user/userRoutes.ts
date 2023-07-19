@@ -22,6 +22,20 @@ const authRouter = (): Router => {
 
   router.get('/verify-google-user/:email',controllers.verifyGoogleUser)
 
+  router.put('/:userId',controllers.updateUser);
+
+  router.get('/forgot-password/:email',controllers.emailCheck)
+
+  router.put('/new-password/:email',controllers.newPassword)
+
+  router.get("/:friendId", controllers.getUser);
+
+  router.get('/profile/:userId',controllers.getProfile);
+
+  router.get('/:userId/user',controllers.getUserDetails);
+
+  router.get('/:name/search',controllers.searchUser)
+
   return router;
 };
 

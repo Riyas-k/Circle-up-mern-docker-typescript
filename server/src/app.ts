@@ -3,19 +3,18 @@ import http from "http";
 import connectDB from "./framework/database/mongodb/connection/connection";
 import serverConfig from "./framework/webServer/server";
 import expressConfig from "./framework/webServer/express";
-import router from './framework/webServer/routes';
+import router from "./framework/webServer/routes";
 //middleware
 import AppError from "./utilities/appError";
 import { HttpStatus } from "./types/httpstatuscodes";
 // import path from 'path';
 
-
-const app :Application = express();
-const server  = http.createServer(app);
+const app: Application = express();
+const server = http.createServer(app);
 app.use((req, res, next) => {
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-    next();
-  });
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
 //mongo
 connectDB();
 
@@ -24,7 +23,7 @@ expressConfig(app);
 
 router(app);
 
-app.all("*",(req:Request,res:Response,next:NextFunction)=>{
-    next(new AppError('Not Found',HttpStatus.UNAUTHORIZED))
+app.all("*", (req: Request, res: Response, next: NextFunction) => {
+  next(new AppError("Not Found", HttpStatus.UNAUTHORIZED));
 });
-serverConfig(server).startServer()
+serverConfig(server).startServer();

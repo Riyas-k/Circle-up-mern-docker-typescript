@@ -1,7 +1,3 @@
+export const adminRepositoryMongodb = () => {};
 
-
-export const adminRepositoryMongodb = ()=>{
-
-}
-
-export type adminRepositoryMongodb = typeof adminRepositoryMongodb
+export type adminRepositoryMongodb = typeof adminRepositoryMongodb;

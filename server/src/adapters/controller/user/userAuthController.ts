@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, response } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthServices } from "../../../framework/services/user/userAuthServiceImp";
 import { AuthServiceInterface } from "../../../application/services/user/userAuthServiceInt";
@@ -9,10 +9,17 @@ import {
 } from "../../../application/repositories/user/userRepositoryInf";
 import {
   addUser,
+  changePassword,
+  checkEmail,
   checkUser,
+  getUserProfile,
+  getUserWithId,
+  profileUpdate,
   userLogin,
   userRegister,
 } from "../../../application/useCase/user/auth/userAuth";
+import { getUserFetch } from "../../../application/useCase/user/auth/userAuth";
+import { getUserSearch } from "../../../application/useCase/user/auth/userDetails";
 
 const authController = (
   authServiceInterface: AuthServiceInterface,
@@ -71,16 +78,88 @@ const authController = (
     }
   });
 
-  const verifyGoogleUser = asyncHandler(async(req:Request,res:Response)=>{
-    const {email} = req.params;
-     const data = await checkUser(email,dbUserRepository,authServices)
-      res.json ({data:data})
+  const verifyGoogleUser = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.params;
+    const data = await checkUser(email, dbUserRepository, authServices);
+    res.json({ data: data });
+  });
+  const updateUser = asyncHandler(async (req, res) => {
+   
+    const {username,name,phoneNumber,email,location,bio,dp} = req.body;
+    const {userId} = req.params
+    const userUpdate = await profileUpdate(username,name,phoneNumber,email,location,bio,dp,userId,dbUserRepository,authServices)
+    res.json({userExist:userUpdate})
+  });
+
+  const emailCheck  = asyncHandler(async(req:Request,res:Response)=>{
+    const {email} = req.params
+     const data = await checkEmail(email,dbUserRepository,authServices)
+     if(data){
+      res.json(true)
+     }else{
+      res.json(false)
+     }
   })
+const newPassword = asyncHandler(async(req:Request,res:Response)=>{
+    try {
+       const {password} = req.body;
+       const {email} = req.params;
+       const data = await  changePassword(email,password,dbUserRepository,authServices)
+       if(data){
+        res.json(true)
+       }
+    } catch (error) {
+      console.log(error);
+    }
+})
+const getUser = asyncHandler(async (req: Request, res: Response) => {
+  const { friendId } = req.params;
+  const data = await getUserFetch(friendId,dbUserRepository)
+  res.json(data)
+
+});
+
+const getProfile = asyncHandler(async(req:Request,res:Response)=>{
+    const {userId} = req.params
+    const data = await getUserProfile(userId,dbUserRepository)
+    res.json(data)
+})
+
+const getUserDetails = asyncHandler(async(req:Request,res:Response)=>{
+  try {
+    console.log(req.params,'mol');
+    const {userId} = req.params
+    const data = await getUserWithId(userId,dbUserRepository)
+    console.log(data,'[]');
+    res.json(data)
+  } catch (error) {
+    console.log(error);
+  }
+
+})
+
+const searchUser = asyncHandler(async(req:Request,res:Response)=>{
+    try {
+      const {name} = req.params;
+      if(!name){
+        res.json({data:[]})
+      }
+        const data = await getUserSearch(name,dbUserRepository)
+        console.log(data,'contr');
+        res.json({status:'success',data})
+    } catch (error) {
+      console.log(error);
+    }
+})
+  
 
   return {
     registerUser,
     loginUser,
-    googleUser,verifyGoogleUser
+    googleUser,
+    verifyGoogleUser,
+    updateUser,emailCheck
+    ,newPassword,getUser,getProfile,getUserDetails,searchUser
   };
 };
 

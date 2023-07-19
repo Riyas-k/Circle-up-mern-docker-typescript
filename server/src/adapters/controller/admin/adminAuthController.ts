@@ -18,16 +18,15 @@ const adminAuthController = (
     const { email, password } = req.body;
     const admin = { email, password };
     const data = await checkAdmin(admin, dbAdminRepository, adminAuthServices);
-      if(data.status){
-        res.json({status:true,data})
-      }else{
-        res.json({status:false})
-      }
-   
+    if (data.status) {
+      res.json({ status: true, data });
+    } else {
+      res.json({ status: false });
+    }
   });
 
   return {
-    loginAdmin
+    loginAdmin,
   };
 };
 export default adminAuthController;

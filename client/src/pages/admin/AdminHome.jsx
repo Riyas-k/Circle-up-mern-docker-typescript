@@ -4,7 +4,17 @@ import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 import AdminHeader from "../../components/admin/AdminHeader";
 import Sidebar from "../../components/admin/Sidebar";
 import { Box } from "@mui/material";
@@ -13,14 +23,15 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useDispatch } from "react-redux";
 import { clearAdmin } from "../../redux/adminAuthReducer";
+import Footer from "../../components/admin/Footer";
 const data = [
-  { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
-  { name: 'Page B', uv: 3000, pv: 1398, amt: 2210 },
-  { name: 'Page C', uv: 2000, pv: 9800, amt: 2290 },
-  { name: 'Page D', uv: 2780, pv: 3908, amt: 2000 },
-  { name: 'Page E', uv: 1890, pv: 4800, amt: 2181 },
-  { name: 'Page F', uv: 2390, pv: 3800, amt: 2500 },
-  { name: 'Page G', uv: 3490, pv: 4300, amt: 2100 },
+  { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
+  { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
+  { name: "Page C", uv: 2000, pv: 9800, amt: 2290 },
+  { name: "Page D", uv: 2780, pv: 3908, amt: 2000 },
+  { name: "Page E", uv: 1890, pv: 4800, amt: 2181 },
+  { name: "Page F", uv: 2390, pv: 3800, amt: 2500 },
+  { name: "Page G", uv: 3490, pv: 4300, amt: 2100 },
 ];
 
 export default function AdminHome() {
@@ -28,10 +39,10 @@ export default function AdminHome() {
   const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
 
-  const toggleSidebar = () => { 
+  const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const handleLogout = () => {
     MySwal.fire({
       title: "Are you sure?",
@@ -46,7 +57,8 @@ const dispatch = useDispatch()
       },
     }).then((result) => {
       if (result.isConfirmed) {
-      dispatch(clearAdmin())
+        localStorage.removeItem("admin");
+        dispatch(clearAdmin());
         navigate("/admin/login");
       }
     });
@@ -66,7 +78,7 @@ const dispatch = useDispatch()
       />
       <main>
         {/* Hero unit */}
-        
+
         <Container sx={{ py: 8 }} maxWidth="md">
           {/* End hero unit */}
           <Grid container spacing={4}>
@@ -121,12 +133,7 @@ const dispatch = useDispatch()
           </Grid>
         </Container>
       </main>
-      {/* Footer */}
-      <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
-        <Typography variant="h6" align="center" gutterBottom>
-          Footer Circle-up@{new Date().getFullYear()}
-        </Typography>
-      </Box>
+     <Footer />
     </>
   );
 }
