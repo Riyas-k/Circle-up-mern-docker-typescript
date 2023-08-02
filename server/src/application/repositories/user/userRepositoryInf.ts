@@ -78,19 +78,46 @@ export const userDbRepository = (
   const getUserName = async(name:string)=>{
     return repository.getUserSpell(name)
   }
+  const putFollower = async(friendId:string,userId:string)=>{
+    return repository.addFollower(friendId,userId)
+  }
+  const removeFollow = async(friendId:string,userId:string)=>{
+    return repository.removeFollower(friendId,userId)
+  }
+  const getFollowers = async(userId:string)=>{
+    return repository.followerList(userId)
+  }
+  const getFollowings = async(userId:string)=>{
+    return repository.followingList(userId)
+  }
+  const findSuggest = async(userId:string)=>{
+    return repository.suggestionUser(userId)
+  }
+  const fetchPosts = async()=>{
+    return repository.fetchPosts()
+  }
+  const reportRemove = async(postId:string,index:number)=>{
+    return repository.removeReport(postId,index)
+  }
+  const getPostsReported = async()=>{
+    return repository.getReportedPosts()
+  }
+  const confirmReport = async(postId:string)=>{
+    return repository.reportConfirm(postId)
+  }
 
   return {
-    addUser,getUserIdProfile,getUserName,
-    getUserByEmail,
-    getUserValid,
+    addUser,getUserIdProfile,getUserName,getFollowers,getFollowings,
+    getUserByEmail,removeFollow,
+    getUserValid,reportRemove,
     getAllUsers,
     blockCurrUser,
-    unBlockCurrUser,
+    unBlockCurrUser,findSuggest,
     newUserGoogle,
     getUserData,
-    updateUser,
-    correctEmail,getProfile,
-    changeNew,getUserById
+    updateUser,getPostsReported,
+    correctEmail,getProfile,confirmReport,
+    changeNew,getUserById,putFollower,fetchPosts
   };
 };
 export type UserDbInterface = typeof userDbRepository;

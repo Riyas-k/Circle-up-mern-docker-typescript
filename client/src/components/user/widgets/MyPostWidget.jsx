@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {
   EditOutlined,
   DeleteOutlined,
@@ -29,7 +30,8 @@ import { setLoading, setPost } from "../../../redux/postReducer";
 import { useNavigate } from "react-router-dom";
 //posts from redux
 
-const MyPostWidget = ({ dp, handleClick }) => {
+const MyPostWidget = ({ dp, handleClick,details }) => {
+
   const dispatch = useDispatch();
   const [isImage, setIsImage] = useState(false);
   const [profile, setProfile] = useState("");
@@ -46,18 +48,19 @@ const MyPostWidget = ({ dp, handleClick }) => {
   const medium = palette.neutral.medium;
   // const navigate = useNavigate()
 
-  const user = useSelector((store) => store.user.payload);
-  const profilePic = useSelector((store) => store.update.image);
+  const user = useSelector((store) => store.user.payload.userExist);
+  // const profilePic = useSelector((store) => store.update.image);
   // const loading = useSelector((store)=>store.post.loading)
-  console.log(user, "///////");
 
   useEffect(() => {
-    setProfile(user?.userExist?.dp);
-  }, []);
+    setProfile(dp);
+  }, [dp]);
 
   //api call
 
-  const handlePost = async () => {
+  const handlePost = async (e) => {
+    try {
+    e.preventDefault()
     if (!image && !video) {
       return alert("pls choose image or video");
     }
@@ -70,33 +73,40 @@ const MyPostWidget = ({ dp, handleClick }) => {
     //     console.log(newPost);
     const userId = user._id;
     if (image) {
-      const imageContentType = "image/jpeg";
-      await uploadFile(image, imageContentType).then((res) => {
+      console.log(image,'image');
+      // const imageContentType = "image/jpeg";
+      await uploadFile(image).then((res) => {
         newPost.image = res;
         newPost.userName = user.UserName;
-        console.log(newPost, "lollllllllllllllllll");
       });
+      console.log(userId,'klll');
       await axios.post(`/${userId}`, newPost);
-      // .then((res)=>{
-      // const dataArray = Object.values(res.data.data);
-      // console.log(typeof(dataArray),'res');
-      // if(res){
-      //   dispatch(setPost({payload:res.data}))
-      // }
-      // setPosts(res.data.data)
-      // })
       dispatch(setLoading());
       setIsImage(false);
       setIsVideo(false);
+      setImage(null)
       setText("");
       handleClick();
     } else if (video) {
       console.log(video, "vi");
-      const videoContentType = "video/mp4";
-      await uploadFile(video, videoContentType).then((res) => {
-        console.log(res, "video response");
-      });
+      // const videoContentType = "video/mp4";
+      await uploadFile(video).then(async(res) => {
+        newPost.image = res;
+        newPost.userName = user.UserName;
+        await axios.post(`/${userId}`, newPost);
+        dispatch(setLoading());
+        setIsImage(false);
+        setIsVideo(false);
+        setVideo(null)
+        setText("");
+        handleClick();
+      })
     }
+      
+    } catch (error) {
+      console.log(error);
+    }
+    
   };
 
   // useEffect(()=>{
@@ -105,11 +115,12 @@ const MyPostWidget = ({ dp, handleClick }) => {
   //   setPosts(post)
 
   // },[])
+  
   return (
     <WidgetWrapper boxShadow="10">
       <FlexBetween gap="1.5rem">
-        {dp ? (
-          <UserImage image={dp} />
+        {details ? (
+          <UserImage image={details?.dp || "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" } />
         ) : (
           <UserImage image="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" />
         )}
@@ -152,6 +163,7 @@ const MyPostWidget = ({ dp, handleClick }) => {
               } else {
                 // Process the accepted file (in this case, set the image state)
                 setImage(acceptedFiles[0]);
+                console.log(image,'god');
                 setVideo(false);
               }
             }}
@@ -214,6 +226,8 @@ const MyPostWidget = ({ dp, handleClick }) => {
               } else {
                 // Process the accepted file (in this case, set the video state)
                 setVideo(acceptedFiles[0]);
+                // setImage(false)
+                console.log(video,'hoi');
               }
             }}
           >
@@ -266,7 +280,7 @@ const MyPostWidget = ({ dp, handleClick }) => {
           </FlexBetween>
         )}
 
-        {/* {!isVideo && (
+        {!isVideo && (
           <FlexBetween
             gap="0.25rem"
             onClick={() => {
@@ -283,7 +297,7 @@ const MyPostWidget = ({ dp, handleClick }) => {
               Video
             </Typography>
           </FlexBetween>
-        )} */}
+        )}
         {/* <FlexBetween gap="0.25rem">
               <AttachFileOutlined sx={{ color: mediumMain }} />
               <Typography color={mediumMain}>Attach</Typography>
@@ -300,7 +314,7 @@ const MyPostWidget = ({ dp, handleClick }) => {
         )} */}
         <Button
           disabled={!text}
-          onClick={handlePost}
+          onClick={(e)=>handlePost(e)}
           sx={{
             color: "white",
             backgroundColor: palette.primary.main,

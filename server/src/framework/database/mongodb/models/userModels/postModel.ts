@@ -15,8 +15,23 @@ const postSchema = new Schema(
         },
         likes:[],
         comments:[],
-        report:[],
-        image:[]
+        report: [
+            {
+              userId: {
+                type: String,
+                required: true,
+              },
+              reason: {
+                type: String, // or the appropriate data type for your reason field
+                required: true,
+              },
+            },
+          ],
+        image:[],
+        adminDeleted:{
+            type:Boolean,
+            default:false
+        }
     },
     {
         timestamps:true

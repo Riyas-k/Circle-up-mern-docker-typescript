@@ -1,13 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import {
-  getStorage,
-  ref,
-  // uploadBytes,
-  getDownloadURL,
-  uploadBytesResumable,
-} from "firebase/storage";
-// import { getFirestore, updateDoc, doc } from "firebase/firestore";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCkPAME7LvVXe5V15TkbAAX8J4_m9F4yRg",
@@ -33,11 +27,36 @@ export const uploadFile = (file) => {
   console.log("call get");
   const storage = getStorage(app);
   const fileExtension = file.name.split('.').pop().toLowerCase();
-  console.log(fileExtension,'extension');
+  let contentType;
+
+  if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+    // Image formats
+    contentType = `image/${fileExtension}`;
+  } else if (['mp4', 'mov', 'avi', 'mkv'].includes(fileExtension)) {
+    // Video formats
+    contentType = `video/${fileExtension}`;
+  } else {
+    throw new Error("Unsupported file format");
+  }
+
+  console.log(contentType, 'extension');
   const metadata = {
-    contentType:`image/${fileExtension}`, // Replace 'image/jpeg' with the appropriate content type for your image file
+    contentType: contentType,
   };
-  const storageRef = ref(storage, "image/" + file.name);
+
+  const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+  let storagePath;
+
+  if (contentType.startsWith('image/')) {
+    storagePath = `images/${uniqueFileName}`;
+  } else if (contentType.startsWith('video/')) {
+    storagePath = `videos/${uniqueFileName}`;
+  } else {
+    throw new Error("Unsupported file format");
+  }
+
+  console.log(file.name, 'file.name');
+  const storageRef = ref(storage, storagePath);
 
   const uploadTask = uploadBytesResumable(storageRef, file, metadata);
 
@@ -46,17 +65,16 @@ export const uploadFile = (file) => {
       "state_changed",
       (snapshot) => {
         // Track upload progress
-
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    console.log('Upload is ' + progress + '% done');
-    switch (snapshot.state) {
-      case 'paused':
-        console.log('Upload is paused');
-        break;
-      case 'running':
-        console.log('Upload is running');
-        break;
-    }
+        console.log('Upload is ' + progress + '% done');
+        switch (snapshot.state) {
+          case 'paused':
+            console.log('Upload is paused');
+            break;
+          case 'running':
+            console.log('Upload is running');
+            break;
+        }
       },
       (error) => {
         switch (error.code) {
@@ -66,14 +84,11 @@ export const uploadFile = (file) => {
           case 'storage/canceled':
             // User canceled the upload
             break;
-    
-          // ...
-    
           case 'storage/unknown':
             // Unknown error occurred, inspect error.serverResponse
             break;
         }
-    
+        reject(error);
       },
       () => {
         // Upload completed successfully, get the download URL
@@ -89,4 +104,3 @@ export const uploadFile = (file) => {
     );
   });
 };
-

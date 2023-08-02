@@ -26,6 +26,7 @@ import { setUserDetails } from "../../../redux/singlereducer";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
+import { setUser } from "../../../redux/followReducer";
 // import { setUsers } from "../../../redux/userSlice";
 
 export default function SignIn() {
@@ -59,6 +60,7 @@ export default function SignIn() {
         if (response.data.status) {
           localStorage.setItem("user", response.data.token);
           dispatch(setUserDetails({ payload: response.data }));
+          dispatch(setUser({payload:response.data}))
           // dispatch(setUsers({ payload: response.data }));
           dispatch(loginSuccess());
           navigate("/");
@@ -81,6 +83,7 @@ export default function SignIn() {
         // console.log(res.data.data.status);
         if (res.data.data.status) {
           dispatch(setUserDetails({ payload: res.data.data.isEmailExist }));
+          dispatch(setUser({payload:res.data.data.isEmailExist}))
           navigate("/");
         }
       });

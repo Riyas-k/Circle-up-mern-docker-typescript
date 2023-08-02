@@ -6,6 +6,7 @@ import AdminAuth from "./adminAuthReducer";
 import themeReducer from "./themeSlice";
 import postReducer from './postReducer';
 import updatedUser from './updatedReducer';
+import followReducer from './followReducer';
 
 const store = configureStore({
   reducer: {
@@ -15,7 +16,8 @@ const store = configureStore({
     admin: AdminAuth,
     theme: themeReducer,
     post:postReducer,
-    update:updatedUser
+    update:updatedUser,
+    follow:followReducer,
   }
 });
 export default store;

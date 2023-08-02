@@ -16,11 +16,9 @@ const updatedUser = createSlice({
   initialState,
   reducers: {
     setUpdatedDetails: (state, action) => {
-      console.log(action.payload,'payload');
       return (state.user = action.payload);
     },
     setImageProfile:(state,action)=>{
-        console.log(action.payload,'payloaddata');
         state.image = action.payload
       }
   },

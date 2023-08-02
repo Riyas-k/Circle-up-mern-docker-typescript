@@ -14,11 +14,12 @@ import axios from "../../../axios/axios";
 import { Alert } from "@mui/material";
 import { auth, provider } from "../../../firebase/config";
 import { signInWithPopup } from "firebase/auth";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
 import image from "../../../assets/circle-Up.png";
+import { loginFailure } from "../../../redux/loginReducers";
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -71,7 +72,8 @@ export default function SignUp() {
       });
     });
   };
-
+  const error = useSelector((state) => state.login.error);
+const dispatch = useDispatch()
   const onSubmit = async (values) => {
     try {
       await axios.post("/sign-up", values).then((response) => {
@@ -79,7 +81,7 @@ export default function SignUp() {
         if (response.data.status) {
           navigate("/sign-in");
         } else {
-          setstate(true);
+          dispatch(loginFailure());
         }
       });
     } catch (error) {
@@ -112,7 +114,11 @@ export default function SignUp() {
           flexDirection: "column",
           alignItems: "center",
         }}
-      >
+      >   {error && (
+        <Alert variant="filled" severity="error">
+          Error Invalid Credentials!
+        </Alert>
+      )}
         <img src={image} height="80px" alt="" />
         {state && (
           <Alert variant="filled" severity="error">

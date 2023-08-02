@@ -3,12 +3,15 @@
 /* eslint-disable react/prop-types */
 import {
   ChatBubbleOutlineOutlined,
+  DeleteOutlined,
   FavoriteBorderOutlined,
   FavoriteOutlined,
   MoreHorizOutlined,
   ShareOutlined,
 } from "@mui/icons-material";
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   Dialog,
@@ -29,21 +32,34 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { format } from "timeago.js";
 import axios from "../../../axios/axios";
-import { deletePost, deletedLoading, setLoading } from "../../../redux/postReducer";
+import {
+  commentLoading,
+  deletePost,
+  deletedLoading,
+  likeLoading,
+  setLoading,
+  setUpdatedPost,
+} from "../../../redux/postReducer";
+import { useNavigate } from "react-router-dom";
 
 const PostWidget = ({
-  postId,fetchPosts,getUserPosts,isProfile,
+  postId,
+  fetchPosts,
+  getUserPosts,
+  isProfile = true,
   postUserId,
   postCreatedAt,
-  name,dp,
+  name,
+  dp,
   description,
   userName,
   image,
   likes,
   comments,
+  socket,
   report,
 }) => {
-  console.log(dp,'koooooooooooooooooooooi');
+  const navigate = useNavigate();
   const postTime = format(postCreatedAt);
   const [isComments, setIsComments] = useState(false);
   const [isEditVisible, setIsEditVisible] = useState(false);
@@ -52,15 +68,20 @@ const PostWidget = ({
   const [isReportVisible, setIsReportVisible] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const { _id } = useSelector((store) => store.user.payload);
+  const { _id, firstName } = useSelector(
+    (store) => store.user.payload?.userExist
+  );
+  const liked = likes.includes(_id);
   const dispatch = useDispatch();
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const primary = palette.primary.main;
   const isProfilePost = useState(true);
   const open = Boolean(anchorEl);
-  const [load,setLoad] = useState(false)
-
+  const [editLoad, setEditLoad] = useState(false);
+  const [load, setLoad] = useState(false);
+  const [commentInput, setCommentInput] = useState("");
+  const [error, setError] = useState(false);
 
   const handlePopoverOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -79,17 +100,41 @@ const PostWidget = ({
     setAnchorEl(null);
   };
 
-  const handleReportConfirm = () => {
+  const handleReportConfirm = async () => {
     setIsReportVisible(true);
+    const res = await axios.put(`/${postId}/report-post`, {
+      userId: _id,
+      reason: reportReason,
+    });
+    if (res?.data == false) {
+      setError(true);
+    }
+    if (res?.data != false) {
+      dispatch(setUpdatedPost(res?.data));
+    }
+    setIsReportVisible(false);
+    dispatch(deletedLoading());
+    setReportReason("");
     setAnchorEl(null);
   };
 
-  const handleSaveEdit = () => {
-    // Perform save edit action
+  const handleSaveEdit = async () => {
+    const updatedPost = {
+      id: postId,
+      text: editDescription,
+    };
+    const response = await axios.post("/edit_post", updatedPost);
+    if (response.data) {
+      setEditLoad(true);
+      setIsEditVisible(false);
+      dispatch(deletedLoading());
+      setIsEditVisible(false);
+      setEditDescription(description);
+    }
   };
 
   const handleReportCancel = () => {
-    setIsReportVisible(false);
+    setIsReportVisible(!isReportVisible);
     setReportReason("");
   };
 
@@ -101,52 +146,143 @@ const PostWidget = ({
     // Perform delete action
     const res = await axios.delete(`/${postId}/post`);
     if (res.data.status) {
-      dispatch(deletePost(postId));
+      // dispatch(deletePost(postId));
       setIsDeleteVisible(false);
       handleDeleteCancel();
-      console.log("after delete");
-      dispatch(deletedLoading())
-      setLoad(true)
+      dispatch(deletedLoading());
+      setLoad(true);
     }
   };
- 
 
+  const handleLike = async () => {
+    console.log(postId, "get liked");
+    const res = await axios.put(`/${postId}/like`, { userId: _id });
+    console.log(res, "res");
+    dispatch(likeLoading());
+    socket.emit("sendNotification", {
+      senderName: firstName,
+      receiverId: postUserId,
+      postId: postId,
+      type: "liked",
+    });
+  };
+  const handleUnLike = async () => {
+    const res = await axios.put(`/${postId}/unLike`, { userId: _id });
+    dispatch(likeLoading());
+  };
+  const isVideo = (fileName) => {
+    const videoExtensions = [".mp4", ".mov", ".avi", ".mkv"];
+    const extension = fileName
+      .substring(fileName.lastIndexOf("."))
+      .toLowerCase()
+      .slice(0, 4);
 
+    return videoExtensions.includes(extension);
+  };
+  const handleDeleteComment = async (index, userId) => {
+    console.log(index, userId, "index");
+    const data = await axios.put(`/:${postId}/delete-comment`, {
+      userId: userId,
+      index: index,
+    });
+    // dispatch({post:data.data})
+    dispatch(likeLoading());
+    setIsComments(!isComments);
+  };
+  const handleAddComment = async () => {
+    console.log(postUserId, commentInput, "hi");
+    const data = await axios.put(`/:${postId}/comment`, {
+      userId: _id,
+      comment: commentInput,
+      firstName,
+    });
+    dispatch(setUpdatedPost({ post: data.data }));
+    dispatch(commentLoading());
+    setIsComments(!isComments);
+    setCommentInput("");
+    socket.emit("sendNotification", {
+      senderName: firstName,
+      receiverId: postUserId,
+      postId: postId,
+      type: "commented",
+    });
+  };
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(false);
+      }, 2000); // 3000 milliseconds = 3 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
   return (
     <WidgetWrapper m="2rem 0">
+      {error && (
+        <Alert severity="success">
+          <AlertTitle>Reported Successfully</AlertTitle>
+          Report Successfully
+        </Alert>
+      )}
       <Friend
         friendId={postUserId}
         name={name}
         subtitle={postTime}
+        isProfile
         userPicturePath=""
-        isProfilePost={isProfilePost} dp={dp}
+        isProfilePost={isProfilePost}
+        dp={dp}
       />
       <Typography color={main} sx={{ mt: "1rem" }}>
         {description}
       </Typography>
-      {image?.map((name, index) => (
-        <React.Fragment key={index}>
-          <img
-            width="100%"
-            height="auto"
-            src={name}
-            alt="post"
-            style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-          />
-        </React.Fragment>
-      ))}
+      {image?.map((name, index) => {
+        return (
+          <React.Fragment key={index}>
+            {isVideo(name) ? (
+              <video
+                src={`${name}?t=${Date.now()}`}
+                controls
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "0.75rem",
+                  marginTop: "0.75rem",
+                }}
+              />
+            ) : (
+              <img
+                src={`${name}`}
+                alt={`post-image-${index}`}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "0.75rem",
+                  marginTop: "0.75rem",
+                }}
+              />
+            )}
+          </React.Fragment>
+        );
+      })}
 
       <FlexBetween mt="0.25rem">
         <FlexBetween gap="1rem">
           <FlexBetween gap="0.3rem">
-            <IconButton onClick={() => {}}>
-              <FavoriteOutlined sx={{ color: primary }} />
-              <FavoriteBorderOutlined />
+            <IconButton>
+              {liked ? (
+                <FavoriteOutlined
+                  sx={{ color: primary }}
+                  onClick={handleUnLike}
+                />
+              ) : (
+                <FavoriteBorderOutlined onClick={handleLike} />
+              )}
             </IconButton>
             <Typography>{likes?.length}</Typography>
           </FlexBetween>
           <FlexBetween gap="0.3rem">
-            <IconButton onClick={() => {}}>
+            <IconButton onClick={() => setIsComments(!isComments)}>
               <ChatBubbleOutlineOutlined />
             </IconButton>
             <Typography>{comments?.length}</Typography>
@@ -184,8 +320,8 @@ const PostWidget = ({
               <Box>
                 <Button
                   onClick={handleReportConfirm}
-                  color="error"
-                  disabled={reportReason.trim() === ""}
+                  sx={{ backgroundColor: "red" }}
+                  // disabled={reportReason.trim() === ""}
                 >
                   Report
                 </Button>
@@ -238,6 +374,9 @@ const PostWidget = ({
           >
             Report
           </Button>
+          {/* {
+            error &&  alert('Already Reported')
+          } */}
         </DialogActions>
       </Dialog>
 
@@ -253,6 +392,61 @@ const PostWidget = ({
           </Button>
         </DialogActions>
       </Dialog>
+      {isComments && (
+        <Box mt="0.5rem">
+          {comments.map(({ userId, comment, firstName }, index) => (
+            <React.Fragment key={index}>
+              <Box>
+                <Divider />
+                <FlexBetween alignItems="center">
+                  <Typography
+                    onClick={() => navigate(`/profile/${userId}`)}
+                    sx={{
+                      "&:hover": {
+                        color: "black",
+                        cursor: "pointer",
+                      },
+                      color: main,
+                      m: "0.5rem 0",
+                      pl: "1rem",
+                    }}
+                  >
+                    {firstName} : {comment}
+                  </Typography>
+                  {/* {userId === _id && ( */}
+                  <IconButton
+                    onClick={() => handleDeleteComment(index, userId)}
+                    size="small"
+                  >
+                    <DeleteOutlined />
+                  </IconButton>
+                  {/* )} */}
+                </FlexBetween>
+              </Box>
+              <Divider />
+            </React.Fragment>
+          ))}
+
+          <Box display="flex" alignItems="center" mt="0.5rem">
+            <TextField
+              variant="outlined"
+              fullWidth
+              label="Add a comment..."
+              size="small"
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleAddComment}
+              disabled={!commentInput.trim()}
+            >
+              Post
+            </Button>
+          </Box>
+        </Box>
+      )}
     </WidgetWrapper>
   );
 };

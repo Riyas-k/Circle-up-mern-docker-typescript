@@ -19,7 +19,14 @@ import {
   userRegister,
 } from "../../../application/useCase/user/auth/userAuth";
 import { getUserFetch } from "../../../application/useCase/user/auth/userAuth";
-import { getUserSearch } from "../../../application/useCase/user/auth/userDetails";
+import {
+  addFollower,
+  followerList,
+  followingList,
+  getUserSearch,
+  removeFollower,
+  suggestFriend,
+} from "../../../application/useCase/user/auth/userDetails";
 
 const authController = (
   authServiceInterface: AuthServiceInterface,
@@ -84,82 +91,151 @@ const authController = (
     res.json({ data: data });
   });
   const updateUser = asyncHandler(async (req, res) => {
-   
-    const {username,name,phoneNumber,email,location,bio,dp} = req.body;
-    const {userId} = req.params
-    const userUpdate = await profileUpdate(username,name,phoneNumber,email,location,bio,dp,userId,dbUserRepository,authServices)
-    res.json({userExist:userUpdate})
+    const { username, name, phoneNumber, email, location, bio, dp } = req.body;
+    const { userId } = req.params;
+    const userUpdate = await profileUpdate(
+      username,
+      name,
+      phoneNumber,
+      email,
+      location,
+      bio,
+      dp,
+      userId,
+      dbUserRepository,
+      authServices
+    );
+    res.json({ userExist: userUpdate });
   });
 
-  const emailCheck  = asyncHandler(async(req:Request,res:Response)=>{
-    const {email} = req.params
-     const data = await checkEmail(email,dbUserRepository,authServices)
-     if(data){
-      res.json(true)
-     }else{
-      res.json(false)
-     }
-  })
-const newPassword = asyncHandler(async(req:Request,res:Response)=>{
-    try {
-       const {password} = req.body;
-       const {email} = req.params;
-       const data = await  changePassword(email,password,dbUserRepository,authServices)
-       if(data){
-        res.json(true)
-       }
-    } catch (error) {
-      console.log(error);
+  const emailCheck = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = req.params;
+    const data = await checkEmail(email, dbUserRepository, authServices);
+    if (data) {
+      res.json(true);
+    } else {
+      res.json(false);
     }
-})
-const getUser = asyncHandler(async (req: Request, res: Response) => {
-  const { friendId } = req.params;
-  const data = await getUserFetch(friendId,dbUserRepository)
-  res.json(data)
-
-});
-
-const getProfile = asyncHandler(async(req:Request,res:Response)=>{
-    const {userId} = req.params
-    const data = await getUserProfile(userId,dbUserRepository)
-    res.json(data)
-})
-
-const getUserDetails = asyncHandler(async(req:Request,res:Response)=>{
-  try {
-    console.log(req.params,'mol');
-    const {userId} = req.params
-    const data = await getUserWithId(userId,dbUserRepository)
-    console.log(data,'[]');
-    res.json(data)
-  } catch (error) {
-    console.log(error);
-  }
-
-})
-
-const searchUser = asyncHandler(async(req:Request,res:Response)=>{
+  });
+  const newPassword = asyncHandler(async (req: Request, res: Response) => {
     try {
-      const {name} = req.params;
-      if(!name){
-        res.json({data:[]})
+      const { password } = req.body;
+      const { email } = req.params;
+      const data = await changePassword(
+        email,
+        password,
+        dbUserRepository,
+        authServices
+      );
+      if (data) {
+        res.json(true);
       }
-        const data = await getUserSearch(name,dbUserRepository)
-        console.log(data,'contr');
-        res.json({status:'success',data})
     } catch (error) {
       console.log(error);
     }
-})
-  
+  });
+  const getUser = asyncHandler(async (req: Request, res: Response) => {
+    const { friendId } = req.params;
+    const data = await getUserFetch(friendId, dbUserRepository);
+    res.json(data);
+  });
+
+  const getProfile = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    const data = await getUserProfile(userId, dbUserRepository);
+    res.json(data);
+  });
+
+  const getUserDetails = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      console.log(req.params, "mol");
+      const { userId } = req.params;
+      const data = await getUserWithId(userId, dbUserRepository);
+      res.json(data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  const searchUser = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { name } = req.params;
+      if (!name) {
+        res.json({ data: [] });
+      }
+      const data = await getUserSearch(name, dbUserRepository);
+      res.json({ status: "success", data });
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
+  const putFollower = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { id } = req.body;
+      const { userId } = req.params;
+      const data = await addFollower(id, userId, dbUserRepository);
+      console.log(data, "noy");
+      if (data) res.json(data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  const putUnFollow = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { id } = req.body;
+      const { userId } = req.params;
+      const data = await removeFollower(id, userId, dbUserRepository);
+      if (data) res.json(data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  const getFollowers = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const data = await followerList(userId, dbUserRepository);
+      res.json(data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  const getFollowing = asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const data = await followingList(userId, dbUserRepository);
+      res.json(data);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  const findSuggest = asyncHandler(async(req:Request,res:Response)=>{
+    try {
+      const {userId} = req.params;
+      const data = await suggestFriend(userId,dbUserRepository)
+      res.json(data)
+    } catch (error) {
+      console.log(error);
+    }
+  })
 
   return {
     registerUser,
+    putUnFollow,
     loginUser,
+    findSuggest,
     googleUser,
     verifyGoogleUser,
-    updateUser,emailCheck
-    ,newPassword,getUser,getProfile,getUserDetails,searchUser
+    updateUser,
+    getFollowing,
+    emailCheck,
+    getFollowers,
+    newPassword,
+    getUser,
+    getProfile,
+    getUserDetails,
+    searchUser,
+    putFollower,
   };
 };
 

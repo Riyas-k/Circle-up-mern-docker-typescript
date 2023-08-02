@@ -16,11 +16,13 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "../../axios/axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Loading from "../../Loading";
 import { blockUser, setUsers, unblockUser } from "../../redux/userSlice";
 import { clearAdmin } from "../../redux/adminAuthReducer";
 import Footer from "../../components/admin/Footer";
+import { Pagination } from "@mui/material";
+import { setBlockLoading, setUserLoading } from "../../redux/themeSlice";
 
 const ViewUsersPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -28,7 +30,9 @@ const ViewUsersPage = () => {
   const MySwal = withReactContent(Swal);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [page, setPage] = useState(1);
+  const userPage = 3;
+  const loading = useSelector((store)=>store.theme.userLoading)
   const fetchAllUsers = async () => {
     try {
       const response = await axios.get("/admin/view-users");
@@ -39,13 +43,14 @@ const ViewUsersPage = () => {
     }
   };
 
-  React.useLayoutEffect(() => {
-    fetchAllUsers();
-  }, []);
+
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  const startIndex = (page - 1) * userPage;
+  const endIndex = startIndex + userPage;
+  const currentUsers = users.slice(startIndex, endIndex);
 
   const handleLogout = () => {
     MySwal.fire({
@@ -67,6 +72,7 @@ const ViewUsersPage = () => {
       }
     });
   };
+ 
 
   const handleNavigate = (link) => {
     navigate(link);
@@ -88,11 +94,11 @@ const ViewUsersPage = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.put(`/admin/block/${userId}`);
-          const updatedUser = response.data.status;
-          dispatch(blockUser({ userId, isBlock: updatedUser.isBlock }));
-          console.log(users,'hi');
+          // const updatedUser = response.data.status;
+          // dispatch(blockUser({ userId, isBlock: updatedUser.isBlock }));
+          dispatch(setUserLoading())
+          dispatch(setBlockLoading())
           await fetchAllUsers();
-          
         } catch (error) {
           console.log(error);
         }
@@ -116,8 +122,10 @@ const ViewUsersPage = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.put(`/admin/unblock/${userId}`);
-          const updatedUser = response.data.status;
-          dispatch(unblockUser({ userId, isBlock: updatedUser.isBlock }));
+          // const updatedUser = response.data.status;
+          dispatch(setUserLoading())
+          dispatch(setBlockLoading())
+          // dispatch(unblockUser({ userId, isBlock: updatedUser.isBlock }));
           await fetchAllUsers();
         } catch (error) {
           console.log(error);
@@ -125,6 +133,16 @@ const ViewUsersPage = () => {
       }
     });
   };
+  React.useLayoutEffect(() => {
+    fetchAllUsers();
+  }, []);
+
+  useEffect(()=>{
+    if(loading){
+      fetchAllUsers()
+      dispatch(setUserLoading())
+    }
+  },[loading])
 
   return (
     <>
@@ -143,7 +161,7 @@ const ViewUsersPage = () => {
           />
           <main>
             <Box sx={{ p: 1 }}>
-              <Box sx={{ textAlign: "center",m:3 }}>
+              <Box sx={{ textAlign: "center", m: 3 }}>
                 <Typography variant="h5" gutterBottom>
                   View Users
                 </Typography>
@@ -166,8 +184,8 @@ const ViewUsersPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {users.map((user, index) => (
-                      <TableRow key={user._id}>
+                    {currentUsers?.map((user, index) => (
+                      <TableRow key={user?._id}>
                         <TableCell
                           sx={{
                             "@media (max-width: 600px)": { display: "none" },
@@ -175,16 +193,16 @@ const ViewUsersPage = () => {
                         >
                           {index + 1}
                         </TableCell>
-                        <TableCell>{user.UserName}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.phone}</TableCell>
+                        <TableCell>{user?.UserName}</TableCell>
+                        <TableCell>{user?.email}</TableCell>
+                        <TableCell>{user?.phone}</TableCell>
 
                         <TableCell align="center">
-                          {user.isBlock ? (
+                          {user?.isBlock ? (
                             <Button
                               variant="contained"
                               color={"success"}
-                              onClick={() => handleUnblock(user._id)}
+                              onClick={() => handleUnblock(user?._id)}
                             >
                               Un Block
                             </Button>
@@ -192,7 +210,7 @@ const ViewUsersPage = () => {
                             <Button
                               variant="contained"
                               color={"error"}
-                              onClick={() => handleBlock(user._id)}
+                              onClick={() => handleBlock(user?._id)}
                             >
                               Block
                             </Button>
@@ -203,6 +221,14 @@ const ViewUsersPage = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                <Pagination
+                  count={Math.ceil(users?.length / userPage)}
+                  page={page}
+                  onChange={(event, value) => setPage(value)}
+                  color="primary"
+                />
+              </Box>
             </Box>
           </main>
           <Footer />

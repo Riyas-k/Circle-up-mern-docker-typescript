@@ -13,7 +13,6 @@ const styles = {
 
 function Loading() {
   const mode = useSelector((store)=>store.theme)
-  console.log(mode.mode);
   return (
     <div style={styles.container}>
       {/* <CircularProgress color="primary" /> */}

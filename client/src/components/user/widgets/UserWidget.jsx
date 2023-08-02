@@ -1,14 +1,12 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import {
   ManageAccountsOutlined,
   EditOutlined,
   LocationOnOutlined,
   WorkOutlineOutlined,
+  MessageOutlined,
 } from "@mui/icons-material";
 import {
   Box,
@@ -20,6 +18,7 @@ import {
   Button,
   Grid,
   IconButton,
+  InputLabel,
 } from "@mui/material";
 import UserImage from "../../UserImage";
 import FlexBetween from "../../FlexBetween";
@@ -35,7 +34,10 @@ import axios from "../../../axios/axios";
 import { uploadFile } from "../../../firebase/config";
 import { setUserDetails } from "../../../redux/singlereducer";
 import { useNavigate, useParams } from "react-router-dom";
-import { setImageProfile, setUpdatedDetails } from "../../../redux/updatedReducer";
+import {
+  setImageProfile,
+  setUpdatedDetails,
+} from "../../../redux/updatedReducer";
 import { profileLoading, setLoading } from "../../../redux/postReducer";
 
 const StyledModal = styled(Modal)`
@@ -85,35 +87,31 @@ const StyledModal = styled(Modal)`
   }
 `;
 
-const UserWidget = ({ userId,checkId }) => {
-  console.log(checkId,'checked');
+const UserWidget = ({ userId, checkId, isProfile,details }) => {
   const dispatch = useDispatch();
   const [user, setUser] = useState([]);
   // const [display,setDisplay] = useState([])
   const [openModal, setOpenModal] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState([]);
   const [image, setImage] = useState([]);
-  const profile = useSelector((store)=>store.post.profile)
-  
-
-
-  const fetchUser = async()=>{
-    console.log(userId,'widget');
-    await axios.get( `/${userId}/user`).then((res)=>{
-      console.log(res,'console widget');
-      setUser(res.data)
-      dispatch(setImageProfile(res?.data?.dp))
-      if(profile){
-        console.log('profile',profile);
-        dispatch(profileLoading())
+  const profile = useSelector((store) => store.post.profile);
+  const isFollowingData = useSelector((store) => store?.follow?.following);
+  const currentId = useSelector((store)=>store.user?.payload?.userExist?._id)
+  const following = isFollowingData?.find(
+    (following) => following._id === userId
+  );
+  const fetchUser = async () => {
+    await axios.get(`/${userId}/user`).then((res) => {
+      setUser(res.data);
+      dispatch(setImageProfile(res?.data?.dp));
+      if (profile) {
+        dispatch(profileLoading());
       }
-    })
-  }
-  useEffect(()=>{
-    fetchUser()
-  },[userId])
-
-  
+    });
+  };
+  useEffect(() => {
+    fetchUser();
+  }, [userId]);
 
   const { palette } = useTheme();
 
@@ -129,19 +127,14 @@ const UserWidget = ({ userId,checkId }) => {
     setImage([]);
     setOpenModal(false);
   };
-  console.log(profile,'profilepage');
-  useEffect(()=>{
-    console.log(profile,'[[]]');
-     if(profile){
-      console.log('profile data console',profile);
-      fetchUser()
-      dispatch(profileLoading())
-     }
-  },[profile,dispatch,userId])
+  useEffect(() => {
+    if (profile) {
+      fetchUser();
+    }
+  }, [profile, dispatch, userId]);
   const handleSaveChanges = async (values) => {
     try {
-      console.log(image.length,'images');
-      if (!image.length==0) {
+      if (!image.length == 0) {
         // const imageContentType = "image/jpeg";
         let data = await uploadFile(image[0]);
         if (data) {
@@ -150,42 +143,37 @@ const UserWidget = ({ userId,checkId }) => {
         }
         values.dp = data;
         const response = await axios.put(`/${userId}`, values);
-         console.log(response.data,'userDetails');
-        const result =  localStorage.setItem(
-          "details",
-          response.data.userExist
-        );
+        const result = localStorage.setItem("details", response.data.userExist);
         console.log(result, "image");
         setUser(response.data.userExist);
-        console.log(user,'user hook');
-        dispatch(setUserDetails({ payload: response.data.userExist }));
-        dispatch(setUpdatedDetails({payload:response.data.userExist}));
-        dispatch(profileLoading())
+        dispatch(setUserDetails({ payload: response.data }));
+        dispatch(setUpdatedDetails({ payload: response.data.userExist }));
+        dispatch(profileLoading());
+        // dispatch(setLoading())
         // setDataUser();
         handleCloseModal();
       } else {
-        console.log("else");
         const response = await axios.put(`/${userId}`, values);
-        console.log(response,'res');
         localStorage.setItem("details", JSON.stringify(response.data));
         const result = JSON.parse(localStorage.getItem("details"));
-        console.log(result,'json result');
         if (result) {
           localStorage.removeItem("details");
           localStorage.setItem("details", JSON.stringify(result.userExist));
-          dispatch(setUserDetails({ payload: result.userExist}));
-          setUserData(result.userExist);
-          console.log(user,'new data without ');
+          dispatch(setUserDetails({ payload: result }));
+          setUserData(result);
+          dispatch(profileLoading());
           handleCloseModal();
         } else {
+          dispatch(profileLoading());
           setUserData(result);
           handleCloseModal();
         }
         setUserData(result);
-        setUser(response.data.user);
+        setUser(result);
         // console.log(user,'user');
-        dispatch(setUserDetails({ payload: response.data }));
+        dispatch(setUserDetails({ payload: result }));
         // setDataUser();
+        dispatch(profileLoading());
         handleCloseModal();
       }
     } catch (error) {
@@ -193,7 +181,7 @@ const UserWidget = ({ userId,checkId }) => {
     }
   };
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const validationSchema = Yup.object().shape({
     username: Yup.string().required("Username is required"),
@@ -204,10 +192,18 @@ const UserWidget = ({ userId,checkId }) => {
     bio: Yup.string().required("Bio is required"),
   });
   const mode = useSelector((store) => store.theme);
-  useEffect(()=>{
+  useEffect(() => {
     handleCloseModal();
-  },[user])
- 
+  }, [user]);
+  const handleMessage = async()=>{
+    const chat =  await axios.post('/chat',{
+      senderId:currentId,
+      receiverId:userId
+    });
+    if(chat){
+      navigate('/chat')
+    }
+  }
   return (
     <WidgetWrapper boxShadow="5">
       {/* FIRST ROW */}
@@ -216,17 +212,18 @@ const UserWidget = ({ userId,checkId }) => {
         pb="1.1rem"
         // onClick={() => navigate(`/profile/`)}
       >
-        <FlexBetween gap="1rem"  onClick={() => {
+        <FlexBetween
+          gap="1rem"
+          onClick={() => {
             navigate(`/profile/${userId}`);
             // navigate(0); // to change url on friends friends profile
-          }}>
-          { user?.dp ? (
-            <UserImage
-              image={user?.dp  } 
-            ></UserImage>
-          ) : (
-            <UserImage image="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" />
-          )}
+          }}
+        >
+            {user?.dp || user?.userExist?.dp ? (
+          <UserImage image={ user?.dp || user?.userExist?.dp || "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" } />
+        ) : (
+          <UserImage image="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" />
+        )}
           <Box>
             <Typography
               variant="h4"
@@ -239,23 +236,48 @@ const UserWidget = ({ userId,checkId }) => {
                 },
               }}
             >
-              {
-                user?.UserName}
+              {user?.UserName || user?.userExist?.UserName}
             </Typography>
 
             <Typography color={medium}>
-              {
-                user?.firstName}
+              {user?.firstName || user?.userExist?.firstName}
             </Typography>
           </Box>
         </FlexBetween>
-        {
-          checkId && <ManageAccountsOutlined
-          sx={{ cursor: "pointer" }}
-          onClick={handleOpenModal}
-        />
-        }
-       
+        {isProfile && userId == following?._id && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            {/* {
+              currentId !== userId ?
+              <Button variant='outlined' onClick={{}}>
+              { following  ? "Unfollow" : "Follow" }
+            </Button>
+            : null
+            } */}
+           
+            {following?._id && userId  && (
+              <Button
+                variant='outlined'
+                startIcon={<MessageOutlined />}
+                onClick={handleMessage}
+                sx={{ marginTop: "0.5rem" }}
+              >
+                Message
+              </Button>
+            )}
+          </Box>
+        )}
+        {checkId && (
+          <ManageAccountsOutlined
+            sx={{ cursor: "pointer" }}
+            onClick={handleOpenModal}
+          />
+        )}
       </FlexBetween>
 
       <Divider />
@@ -265,14 +287,13 @@ const UserWidget = ({ userId,checkId }) => {
         <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
           <LocationOnOutlined fontSize="large" sx={{ color: main }} />
           <Typography color={medium}>
-            {
-              user?.location}
+            {user?.location || user?.userExist?.location}
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap="1rem">
           <WorkOutlineOutlined fontSize="large" sx={{ color: main }} />
           <Typography color={medium}>
-            { user?.bio}
+            {user?.bio || user?.userExist?.bio}
           </Typography>
         </Box>
       </Box>
@@ -284,13 +305,13 @@ const UserWidget = ({ userId,checkId }) => {
         <FlexBetween mb="0.5rem">
           <Typography color={medium}>Followers</Typography>
           <Typography color={main} fontWeight="500">
-            10
+            {user?.followers?.length}
           </Typography>
         </FlexBetween>
         <FlexBetween>
           <Typography color={medium}>Following</Typography>
           <Typography color={main} fontWeight="500">
-            15
+            {user?.following?.length}
           </Typography>
         </FlexBetween>
       </Box>
@@ -342,11 +363,19 @@ const UserWidget = ({ userId,checkId }) => {
           <Formik
             initialValues={{
               username: user?.userExist?.UserName || user?.UserName || "",
-              name: user?.userExist?.firstName || user?.firstName || user?.firstName|| "",
+              name:
+                user?.userExist?.firstName ||
+                user?.firstName ||
+                user?.firstName ||
+                "",
               phoneNumber: user?.userExist?.phone || user?.phone || "",
               email: user?.userExist?.email || user?.email || "",
-              location: user?.userExist?.location || userData?.location || user?.location  ||"",
-              bio: user?.userExist?.bio || userData?.bio || user?.bio||"",
+              location:
+                user?.userExist?.location ||
+                userData?.location ||
+                user?.location ||
+                "",
+              bio: user?.userExist?.bio || userData?.bio || user?.bio || "",
               // dp: user?.userExist?.dp || "",
             }}
             validationSchema={validationSchema}
@@ -356,9 +385,9 @@ const UserWidget = ({ userId,checkId }) => {
               <Form>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
+                    <InputLabel htmlFor="username">Username</InputLabel>
                     <TextField
                       className="modal-input"
-                      label="Username"
                       name="username"
                       fullWidth
                       variant="outlined"
@@ -372,9 +401,9 @@ const UserWidget = ({ userId,checkId }) => {
                     />
                   </Grid>
                   <Grid item xs={6}>
+                    <InputLabel htmlFor="name">Name</InputLabel>
                     <TextField
                       className="modal-input"
-                      label="Name"
                       name="name"
                       fullWidth
                       variant="outlined"
@@ -389,9 +418,9 @@ const UserWidget = ({ userId,checkId }) => {
                     />
                   </Grid>
                   <Grid item xs={6}>
+                    <InputLabel htmlFor="phoneNumber">Phone Number</InputLabel>
                     <TextField
                       className="modal-input"
-                      label="Phone Number"
                       name="phoneNumber"
                       fullWidth
                       variant="outlined"
@@ -406,9 +435,9 @@ const UserWidget = ({ userId,checkId }) => {
                     />
                   </Grid>
                   <Grid item xs={6}>
+                    <InputLabel htmlFor="email">Email</InputLabel>
                     <TextField
                       className="modal-input"
-                      label="Email"
                       name="email"
                       fullWidth
                       variant="outlined"
@@ -423,9 +452,9 @@ const UserWidget = ({ userId,checkId }) => {
                     />
                   </Grid>
                   <Grid item xs={6}>
+                    <InputLabel htmlFor="location">Location</InputLabel>
                     <TextField
                       className="modal-input"
-                      label="Location"
                       name="location"
                       fullWidth
                       variant="outlined"
@@ -440,9 +469,9 @@ const UserWidget = ({ userId,checkId }) => {
                     />
                   </Grid>
                   <Grid item xs={6}>
+                    <InputLabel htmlFor="bio">Bio</InputLabel>
                     <TextField
                       className="modal-input"
-                      label="Bio"
                       name="bio"
                       fullWidth
                       multiline
@@ -463,14 +492,13 @@ const UserWidget = ({ userId,checkId }) => {
                   accept=".jpg,.jpeg,.png"
                   multiple={false}
                   onDrop={(acceptedFiles, rejectedFiles) => {
-                    
                     const isValidFileType = acceptedFiles.every((file) => {
                       const fileType = file.type;
                       return (
                         fileType === "image/jpeg" || fileType === "image/png"
                       );
                     });
-                      console.log(isValidFileType);
+                    console.log(isValidFileType);
                     if (!isValidFileType) {
                       // Show error message for invalid file types
                       alert(
@@ -478,7 +506,7 @@ const UserWidget = ({ userId,checkId }) => {
                       );
                     } else {
                       // Process the accepted file (in this case, set the image state)
-                      console.log(acceptedFiles,'files');
+                      console.log(acceptedFiles, "files");
                       setImage(acceptedFiles);
                     }
                   }}

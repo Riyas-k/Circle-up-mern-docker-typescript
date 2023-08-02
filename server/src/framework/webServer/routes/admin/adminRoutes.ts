@@ -22,9 +22,17 @@ const adminAuthRouter = () => {
 
   router.get("/view-users", controllers.getUsers);
 
+  router.get("/view-posts", controllers.viewAllPosts);
+
   router.put("/block/:userId", controllers.blockUser);
 
   router.put("/unblock/:userId", controllers.unBlockUser);
+
+  router.put("/reported-remove", controllers.reportRemove);
+
+  router.get("/reported-posts", controllers.reportedPosts);
+
+  router.put('/confirm-report/:postId',controllers.confirmReport)
 
   return router;
 };

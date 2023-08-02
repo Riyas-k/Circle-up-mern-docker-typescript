@@ -22,7 +22,8 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.2.3",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "socket.io": "^4.7.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

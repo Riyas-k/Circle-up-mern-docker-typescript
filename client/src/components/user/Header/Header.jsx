@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
@@ -21,14 +22,16 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUser } from "../../../redux/singlereducer";
 import image from "../../../assets/circle-Up.png";
-import { Stack, Tooltip } from "@mui/material";
+import { Badge, Button, Popover, Stack, Tooltip } from "@mui/material";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { setMode } from "../../../redux/themeSlice";
 import dark from "../../../assets/dark.png";
 import debounce from "lodash.debounce";
-import axios from '../../../axios/axios'
+import axios from "../../../axios/axios";
 import { useTheme } from "@emotion/react";
+import { clearUserLogout } from "../../../redux/followReducer";
+import { Notifications } from "@mui/icons-material";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -71,7 +74,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function Header() {
+export default function Header({ socket }) {
+  const [notificationAnchorEl, setNotificationAnchorEl] = React.useState(null);
+  const [notifications, setNotifications] = React.useState([]);
   const theme = useTheme();
   const user = useSelector((state) => state.user.payload);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -81,7 +86,15 @@ export default function Header() {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const navigate = useNavigate();
   const mode = useSelector((store) => store.theme.mode);
+  const iconColor = mode === "dark" ? "white" : "black";
   const dispatch = useDispatch();
+
+  const openNotificationPopover = (e) => {
+    setNotificationAnchorEl(e.currentTarget);
+  };
+  const closeNotificationPopover = () => {
+    setNotificationAnchorEl(null);
+  };
   // const [text,setText] = React.useState('');
   const [suggestions, setSuggestions] = React.useState([]);
 
@@ -102,6 +115,32 @@ export default function Header() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+  const isNotificationPopoverOpen = Boolean(notificationAnchorEl);
+  const displayNotification = ({ senderName, type }) => {
+    let action;
+    if (type === "liked") {
+      action = "liked";
+    } else if (type === "commented") {
+      action = "commented";
+    } else {
+      action = "shared";
+    }
+    return (
+      <span className="notification">{`${senderName} ${action} on your post`}</span>
+    );
+  };
+  React.useEffect(() => {
+    socket?.on("getNotifications", (data) => {
+      const isDuplicate = notifications.some(
+        (item) => item.postId == data.postId
+      );
+      if (!isDuplicate) {
+        setNotifications((prev) => [...prev, data]);
+      }
+    });
+  }, [socket]);
+  const unreadNotifications = notifications.length > 0;
+
   const handleLogout = () => {
     MySwal.fire({
       title: "Are you sure?",
@@ -119,6 +158,7 @@ export default function Header() {
         // Perform delete operation
         localStorage.removeItem("token");
         dispatch(clearUser());
+        dispatch(clearUserLogout());
         navigate("/sign-in");
       }
     });
@@ -130,7 +170,7 @@ export default function Header() {
       anchorEl={anchorEl}
       anchorOrigin={{
         vertical: "top",
-        horizontal: "right"
+        horizontal: "right",
       }}
       id={menuId}
       keepMounted
@@ -140,7 +180,7 @@ export default function Header() {
       }}
       open={isMenuOpen}
       onClose={handleMenuClose}
-      sx={{marginTop:"30px"}}
+      sx={{ marginTop: "30px" }}
     >
       {/* <MenuItem onClick={handleMenuClose}>Profile</MenuItem> */}
       <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
@@ -166,34 +206,16 @@ export default function Header() {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
-        {/* <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
-        >
-          <SettingsIcon />
-        </IconButton>
-        <Link
-          style={{
-            marginTop: "2px",
-            textDecoration: "none",
-            color: mode === "light" ? "black" : "white",
-          }}
-          to="/settings" 
-        >
-          Settings
-        </Link> */}
+      <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
+        Logout
       </MenuItem>
     </Menu>
   );
   const handleQueryChange = debounce(async (newQuery) => {
     try {
-      console.log(newQuery,'mol');
-      const response = await axios.get(`/${newQuery}/search`)
-      console.log(response,'header search');
+      console.log(newQuery, "mol");
+      const response = await axios.get(`/${newQuery}/search`);
+      console.log(response, "header search");
       setSuggestions(response.data.data);
       // setLoading(false);
     } catch (error) {
@@ -201,12 +223,11 @@ export default function Header() {
       // setLoading(false);
     }
   }, 200);
-  
+
   const searchUser = (event) => {
     const inputValue = event.target.value;
     handleQueryChange(inputValue);
   };
-console.log(suggestions,'searched');
 
   return (
     <Stack
@@ -243,18 +264,20 @@ console.log(suggestions,'searched');
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-              placeholder="Search…" onKeyUp={searchUser} 
+              placeholder="Search…"
+              onKeyUp={searchUser}
               inputProps={{ "aria-label": "search" }}
             />
           </Search>
           {Boolean(suggestions?.length) && (
-              <Box
+            <Box
               sx={{
                 position: "absolute",
                 top: "80%",
                 left: "120px",
                 width: "18%",
-                backgroundColor: 'white',
+                backgroundColor: "white",
+                color: "black",
                 borderRadius: "0.5rem",
                 boxShadow: theme.shadows[1],
                 mt: "0.25rem",
@@ -262,29 +285,100 @@ console.log(suggestions,'searched');
                 overflowY: "auto",
               }}
             >
-                {suggestions?.map((suggestion) => (
+              {suggestions?.map((suggestion) => (
+                <Typography
+                  key={suggestion._id}
+                  onClick={() => {
+                    navigate(`/profile/${suggestion._id}`);
+                    // navigate(0); // to change url on friends friends profile
+                  }}
+                  sx={{
+                    py: "0.5rem",
+                    px: "1rem",
+                    cursor: "pointer",
+                    "&:hover": {
+                      backgroundColor: "grey",
+                      color: theme.palette.background.default,
+                    },
+                  }}
+                >
+                  {suggestion.UserName}
+                </Typography>
+              ))}
+            </Box>
+          )}
+          {/* NOTIFICATION POPOVER */}
+          <Popover
+            open={isNotificationPopoverOpen}
+            anchorEl={notificationAnchorEl}
+            onClose={closeNotificationPopover}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <Box sx={{ p: "1rem" }}>
+              {notifications.length === 0 ? (
+                <Typography>No notifications</Typography>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  {notifications.map((notification) => {
+                    // if (index % 2 === 1) {
+                    //   // Skip odd indexes
+                    //   return null;
+                    // }
+
+                    return (
+                      <Typography
+                        key={notification.id}
+                        style={{ marginBottom: "0.5rem" }}
+                      >
+                        {displayNotification(notification)}
+                      </Typography>
+                    );
+                  })}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      marginTop: "1rem",
+                    }}
+                  >
                     <Typography
-                      key={suggestion._id}
-                      onClick={() => {
-                        navigate(`/profile/${suggestion._id}`);
-                        // navigate(0); // to change url on friends friends profile
-                      }}
+                      variant="body2"
+                      sx={{ marginRight: "0.5rem", color: "gray" }}
+                    >
+                      {notifications.length} unread notifications
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      onClick={() => setNotifications([])}
                       sx={{
-                        py: "0.5rem",
-                        px: "1rem",
-                        cursor: "pointer",
+                        backgroundColor: "#00D5FA",
+                        color: "#fff",
                         "&:hover": {
-                          backgroundColor: theme.palette.primary.light,
-                          color: theme.palette.background.default,
+                          backgroundColor: "#00353F",
                         },
                       }}
                     >
-                      {suggestion.UserName}
-                    </Typography>
-                  ))}
-                </Box>
-            )
-          }
+                      Clear Notifications
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Box>
+          </Popover>
 
           <Box sx={{ flexGrow: 1 }} />
 
@@ -319,7 +413,9 @@ console.log(suggestions,'searched');
             sx={{ mt: -0 }}
           >
             <Tooltip title="Messages" placement="bottom">
-              <MessageIcon />
+              <Link to="/chat">
+                <MessageIcon sx={{ color: iconColor, marginTop: "-6px",margin:'px' }} />
+              </Link>
             </Tooltip>
           </IconButton>
 
@@ -338,15 +434,23 @@ console.log(suggestions,'searched');
               aria-label="show 4 new mails"
               color="inherit"
             >
-              <Tooltip title="Notifications" placement="bottom">
-                <Link
-                  to="/"
-                  style={{ textDecoration: "none", color: "black" }}
+              <Tooltip title="Notification" placement="bottom">
+                <IconButton
+                  sx={{  color: mode === "light" ? "black" : "white",
+                  cursor: "pointer",
+                  fontSize: "25px",marginTop:'5px' }}
+                  onClick={openNotificationPopover}
                 >
-                  <NotificationsIcon
-                    sx={{ color: mode === "light" ? "black" : "white" }}
-                  />
-                </Link>
+                  {unreadNotifications ? (
+                    <Badge badgeContent={notifications?.length}>
+                      <Notifications
+                       
+                      />
+                    </Badge>
+                  ) : (
+                    <Notifications  />
+                  )}
+                </IconButton>
               </Tooltip>
             </IconButton>
           </Box>

@@ -20,21 +20,31 @@ const authRouter = (): Router => {
 
   router.post("/google", controllers.googleUser);
 
-  router.get('/verify-google-user/:email',controllers.verifyGoogleUser)
+  router.get("/verify-google-user/:email", controllers.verifyGoogleUser);
 
-  router.put('/:userId',controllers.updateUser);
+  router.put("/:userId", controllers.updateUser);
 
-  router.get('/forgot-password/:email',controllers.emailCheck)
+  router.get("/forgot-password/:email", controllers.emailCheck);
 
-  router.put('/new-password/:email',controllers.newPassword)
+  router.put("/new-password/:email", controllers.newPassword);
 
   router.get("/:friendId", controllers.getUser);
 
-  router.get('/profile/:userId',controllers.getProfile);
+  router.get("/profile/:userId", controllers.getProfile);
 
-  router.get('/:userId/user',controllers.getUserDetails);
+  router.get("/:userId/user", controllers.getUserDetails);
 
-  router.get('/:name/search',controllers.searchUser)
+  router.get("/:name/search", controllers.searchUser);
+
+  router.put("/:userId/follow", controllers.putFollower);
+
+  router.put("/:userId/unFollow", controllers.putUnFollow);
+
+  router.get("/:userId/follower", controllers.getFollowers);
+
+  router.get("/:userId/following", controllers.getFollowing);
+
+  router.get("/find-suggest/:userId", controllers.findSuggest);
 
   return router;
 };
