@@ -7,30 +7,42 @@ export const chatCreate = async (
   receiverId: string,
   repository: ReturnType<chatDbInterfaceType>
 ) => {
-  const chat:any = await repository.createChat(senderId, receiverId);
-  if (!chat) {
-    throw new AppError("user not found", HttpStatus.UNAUTHORIZED);
+  try {
+    const chat: any = await repository.createChat(senderId, receiverId);
+    if (!chat) {
+      throw new AppError("user not found", HttpStatus.UNAUTHORIZED);
+    }
+    return chat;
+  } catch (error) {
+    console.log(error);
   }
-  return chat;
 };
 export const getAllChats = async (
   userId: string,
   repository: ReturnType<chatDbInterfaceType>
 ) => {
-  const getChats : any = await repository.getAllChat(userId);
-  if (!getChats) {
-    throw new AppError("Posts Are not Available", HttpStatus.BAD_REQUEST);
+  try {
+    const getChats: any = await repository.getAllChat(userId);
+    if (!getChats) {
+      throw new AppError("Posts Are not Available", HttpStatus.BAD_REQUEST);
+    }
+    return getChats;
+  } catch (error) {
+    console.log(error);
   }
-  return getChats;
 };
 export const getChat = async (
   firstId: string,
   secondId: string,
   repository: ReturnType<chatDbInterfaceType>
 ) => {
-    const getChats:any = await repository.getChat(firstId,secondId);
+  try {
+    const getChats: any = await repository.getChat(firstId, secondId);
     if (!getChats) {
-        throw new AppError("Posts Are not Available", HttpStatus.BAD_REQUEST);
-      }
-      return getChats;
+      throw new AppError("Posts Are not Available", HttpStatus.BAD_REQUEST);
+    }
+    return getChats;
+  } catch (error) {
+    console.log(error);
+  }
 };

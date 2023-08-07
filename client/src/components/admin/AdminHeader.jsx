@@ -13,12 +13,12 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode } from "../../redux/themeSlice";
-import dark from '../../assets/dark.png'
+import dark from "../../assets/dark.png";
 
 const AdminHeader = ({ toggleSidebar, handleLogout }) => {
   const mode = useSelector((store) => store.theme.mode);
   const dispatch = useDispatch();
-  
+
   return (
     <Stack
       direction="row"
@@ -27,10 +27,19 @@ const AdminHeader = ({ toggleSidebar, handleLogout }) => {
         position: "sticky",
         background: "#000",
         top: 0,
+        zIndex: 1000,
         justifyContent: "space-between",
       }}
     >
-      <AppBar position="relative" sx={{      backgroundColor: mode === "light" ? "white" : "black", }}>
+      <AppBar
+        position="relative"
+        sx={{
+          backgroundColor: mode === "light" ? "white" : "black",
+           // Set a higher zIndex to keep the header above other components
+
+          top: 0,
+        }}
+      >
         <Toolbar sx={{ justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <IconButton
@@ -40,32 +49,47 @@ const AdminHeader = ({ toggleSidebar, handleLogout }) => {
               edge="start"
               sx={{ mr: 2 }}
             >
-              <MenuIcon sx={{color:mode === "light" ? "black" : "white" }} />
+              <MenuIcon sx={{ color: mode === "light" ? "black" : "white" }} />
             </IconButton>
-            <img src={mode==='light'?image:dark} height="60px" alt="" />
+            <img src={mode === "light" ? image : dark} height="60px" alt="" />
             <Link
               to="/admin"
               style={{ textDecoration: "none", color: "black" }}
             >
               <Typography
                 variant="h6"
-                sx={{color:mode === "light" ? "black" : "white" }}
-                noWrap ml="10px"
+                sx={{ color: mode === "light" ? "black" : "white" }}
+                noWrap
+                ml="10px"
               >
                 Admin
               </Typography>
             </Link>
           </div>
           {mode === "dark" ? (
-            <LightModeIcon 
-            sx={{color:mode === "light" ? "black" : "white",justifyContent:'center',cursor:"pointer" }}
+            <LightModeIcon
+              sx={{
+                color: mode === "light" ? "black" : "white",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
               onClick={() => dispatch(setMode())}
             />
           ) : (
-            <DarkModeIcon  sx={{color:mode === "light" ? "black" : "white",justifyContent:'center',cursor:"pointer" }} onClick={() => dispatch(setMode())} />
+            <DarkModeIcon
+              sx={{
+                color: mode === "light" ? "black" : "white",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              onClick={() => dispatch(setMode())}
+            />
           )}
           <Button
-            sx={{ color:mode === "light" ? "black" : "white", "&:hover": { background: "red" } }}
+            sx={{
+              color: mode === "light" ? "black" : "white",
+              "&:hover": { background: "red" },
+            }}
             onClick={handleLogout}
           >
             Logout

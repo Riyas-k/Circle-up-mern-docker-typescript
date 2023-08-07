@@ -121,8 +121,10 @@ export const changePassword = async (
   authService: ReturnType<AuthServiceInterface>
 ) => {
   let encryptPassword = await authService.encryptPassword(password);
-  const details: any = await userRepository.changeNew(email, encryptPassword);
-  return details
+  if(typeof encryptPassword === 'string'){
+    const details: any = await userRepository.changeNew(email, encryptPassword);
+    return details
+  }
 };
 
 export const getUserFetch = async(friendId:string,userRepository:ReturnType<UserDbInterface>)=>{

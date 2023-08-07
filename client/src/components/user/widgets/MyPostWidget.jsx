@@ -30,7 +30,7 @@ import { setLoading, setPost } from "../../../redux/postReducer";
 import { useNavigate } from "react-router-dom";
 //posts from redux
 
-const MyPostWidget = ({ dp, handleClick,details }) => {
+const MyPostWidget = ({ dp, handleClick,details,isProfile=false }) => {
 
   const dispatch = useDispatch();
   const [isImage, setIsImage] = useState(false);
@@ -117,10 +117,11 @@ const MyPostWidget = ({ dp, handleClick,details }) => {
   // },[])
   
   return (
+    
     <WidgetWrapper boxShadow="10">
       <FlexBetween gap="1.5rem">
-        {details ? (
-          <UserImage image={details?.dp || "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" } />
+        {details || dp ? (
+          <UserImage image={details?.dp ||dp || "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" } />
         ) : (
           <UserImage image="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=" />
         )}

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
@@ -236,7 +237,7 @@ export default function Header({ socket }) {
       sx={{
         position: "sticky",
         top: 0,
-        zIndex: 999,
+        zIndex: 1000,
       }}
     >
       <AppBar
@@ -245,6 +246,8 @@ export default function Header({ socket }) {
           backgroundColor: mode === "light" ? "white" : "black",
           color: mode === "light" ? "black" : "white",
           py: 1,
+         
+        justifyContent: "space-between",
         }}
       >
         <Toolbar>

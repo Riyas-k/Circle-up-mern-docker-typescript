@@ -19,7 +19,7 @@ const FriendListWidget = ({
   details,
   handleEffect,
   handleClick,
-  isProfile=false,
+  isProfile = false,
 }) => {
   const dispatch = useDispatch();
   const { palette } = useTheme();
@@ -81,7 +81,6 @@ const FriendListWidget = ({
     getSuggestions();
   }, []);
 
-
   useEffect(() => {
     if (expanded) {
       setFollowersToShow(followers);
@@ -96,14 +95,13 @@ const FriendListWidget = ({
   const handleViewMore = () => {
     setExpanded(!expanded);
   };
-  useEffect(()=>{
-   if(follow){
-    getSuggestions();
-   }
-  },[id,follow])
   useEffect(() => {
     if (follow) {
-     
+      getSuggestions();
+    }
+  }, [id, follow]);
+  useEffect(() => {
+    if (follow) {
       getFriends();
     }
   }, [id]);
@@ -163,7 +161,7 @@ const FriendListWidget = ({
         >
           Following
         </Typography>
-       
+
         {following?.length == 0 && <p>No following to display</p>}
         <Box display="flex" flexDirection="column" gap="1.5rem">
           {followingToShow?.map((state) => {
@@ -198,54 +196,51 @@ const FriendListWidget = ({
           </Typography>
         )}
       </WidgetWrapper>
-      {
-          !isProfile && (
-            <WidgetWrapper style={{ marginTop: "20px" }}>
+      {!isProfile && (
+        <WidgetWrapper style={{ marginTop: "20px" }}>
+          <Typography
+            color={palette.neutral.dark}
+            variant="h5"
+            fontWeight="500"
+            sx={{ mb: "1.5rem" }}
+          >
+            Suggestions
+          </Typography>
+          {suggestions?.length == 0 && <p>No Suggestions.</p>}
+          <Box display="flex" flexDirection="column" gap="1.5rem">
+            {suggestionsToShow?.map((state) => {
+              return (
+                <Friend
+                  friendId={state?._id}
+                  details={details}
+                  key={state?._id}
+                  subtitle={state?.UserName}
+                  dp={state?.dp}
+                  name={state?.firstName}
+                  handleRequest={handleRequest}
+                  handleClick={handleClick}
+                />
+              );
+            })}
+          </Box>
+          {suggestions.length > itemsPerRow && !expanded && (
             <Typography
-              color={palette.neutral.dark}
-              variant="h5"
-              fontWeight="500"
-              sx={{ mb: "1.5rem" }}
+              sx={{
+                cursor: "pointer",
+                color: palette.primary.main,
+                variant: "body2",
+                textAlign: "center", // Center-align the button
+                marginTop: "20px", // Add margin-top
+              }}
+              onClick={handleViewMore}
+              color={palette.primary.main}
+              variant="body2"
             >
-              Suggestions
+              View More
             </Typography>
-            {suggestions?.length == 0 && <p>No Suggestions.</p>}
-            <Box display="flex" flexDirection="column" gap="1.5rem">
-              {suggestionsToShow?.map((state) => {
-                return (
-                  <Friend
-                    friendId={state?._id}
-                    details={details}
-                    key={state?._id}
-                    subtitle={state?.UserName}
-                    dp={state?.dp}
-                    name={state?.firstName}
-                    handleRequest={handleRequest}
-                    handleClick={handleClick}
-                  />
-                );
-              })}
-            </Box>
-            {suggestions.length > itemsPerRow && !expanded && (
-              <Typography
-                sx={{
-                  cursor: "pointer",
-                  color: palette.primary.main,
-                  variant: "body2",
-                  textAlign: "center", // Center-align the button
-                  marginTop: "20px", // Add margin-top
-                }}
-                onClick={handleViewMore}
-                color={palette.primary.main}
-                variant="body2"
-              >
-                View More
-              </Typography>
-            )}
-          </WidgetWrapper>
-          )
-        }
-     
+          )}
+        </WidgetWrapper>
+      )}
     </>
   );
 };

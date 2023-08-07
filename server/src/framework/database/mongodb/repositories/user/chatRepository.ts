@@ -11,28 +11,35 @@ export const chatRepositoryImp = () => {
       });
       if (existingChat) {
         return existingChat;
-      }else{
+      } else {
         const newChat = new Chat({
-            members: [senderId, receiverId],
-          });
-          const savedChat = await newChat.save();
-          return savedChat;
+          members: [senderId, receiverId],
+        });
+        const savedChat = await newChat.save();
+        return savedChat;
       }
-     
     } catch (error) {
       console.log(error);
       throw error;
     }
   };
   const getAllChat = async (userId: string) => {
-    return await Chat.find({
-      members: { $in: [userId] },
-    });
+    try {
+      return await Chat.find({
+        members: { $in: [userId] },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
   const getChat = async (firsId: string, secondId: string) => {
-    return await Chat.find({
-      members: { $all: [firsId, secondId] },
-    });
+    try {
+      return await Chat.find({
+        members: { $all: [firsId, secondId] },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
   return {
     createChat,

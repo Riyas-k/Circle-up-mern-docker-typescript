@@ -9,30 +9,46 @@ export const postRepositoryMongoDb = () => {
     image: string,
     userName: string
   ) => {
-    const post = {
-      userId: userId,
-      description: text,
-      image: image,
-      userName: userName,
-    };
-    const newPost = new Post(post);
-    return newPost.save();
+    try {
+      const post = {
+        userId: userId,
+        description: text,
+        image: image,
+        userName: userName,
+      };
+      const newPost = new Post(post);
+      return newPost.save();
+    } catch (error) {
+      console.log(error);
+    }
   };
-  const getPosts = async (userId:string) => {
-    const user:any = await User.findById(userId);
-    const followingIds = user.following;
-    followingIds.push(userId)
-    const data = await Post.find({userId:{$in:followingIds}});
-    return data;
+  const getPosts = async (userId: string) => {
+    try {
+      const user: any = await User.findById(userId);
+      const followingIds = user.following;
+      followingIds.push(userId);
+      const data = await Post.find({ userId: { $in: followingIds } });
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const getUser = async (friendId: string) => {
-    const data = await Post.findOne({ userId: friendId });
-    return data;
+    try {
+      const data = await Post.findOne({ userId: friendId });
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const fetchUserPost = async (userId: string) => {
-    const data = await Post.find({ userId: userId });
-    return data;
+    try {
+      const data = await Post.find({ userId: userId });
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const postDelete = async (postId: string) => {
     try {
@@ -59,43 +75,58 @@ export const postRepositoryMongoDb = () => {
     }
   };
   const postLike = async (postId: string, userId: string) => {
-    console.log(postId, userId, "jello");
-    const data: any = await Post.updateOne(
-      { _id: postId, likes: { $ne: userId } },
-      {
-        $addToSet: {
-          likes: userId,
-        },
-      }
-    );
-    return true;
+    try {
+      const data: any = await Post.updateOne(
+        { _id: postId, likes: { $ne: userId } },
+        {
+          $addToSet: {
+            likes: userId,
+          },
+        }
+      );
+      return true;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const unLike = async (postId: string, userId: string) => {
-    const data: any = await Post.updateOne(
-      { _id: postId },
-      {
-        $pull: {
-          likes: userId,
+    try {
+      const data: any = await Post.updateOne(
+        { _id: postId },
+        {
+          $pull: {
+            likes: userId,
+          },
         },
-      },
-      {
-        new: true,
-      }
-    );
-    return true;
+        {
+          new: true,
+        }
+      );
+      return true;
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const putComment = async (
     postId: string,
     userId: string,
     comment: string,
-    firstName:string
+    firstName: string
   ) => {
     const newId = postId.replace(/:/g, "");
     try {
       const post = await Post.findByIdAndUpdate(
         { _id: newId },
-        { $push: { comments: { userId: userId, comment: comment,firstName:firstName } } }
+        {
+          $push: {
+            comments: {
+              userId: userId,
+              comment: comment,
+              firstName: firstName,
+            },
+          },
+        }
       );
       return post;
     } catch (error) {
@@ -124,13 +155,15 @@ export const postRepositoryMongoDb = () => {
     try {
       const newId = postId.replace(/:/g, "");
       const post = await Post.findById(newId);
-  
+
       if (post) {
-        const isUserReported = post?.report?.some((report) => report?.userId === userId);
-  
+        const isUserReported = post?.report?.some(
+          (report) => report?.userId === userId
+        );
+
         if (!isUserReported) {
           // If the user is not already reported, push the new report
-          post?.report?.push({ userId:userId, reason:reason });
+          post?.report?.push({ userId: userId, reason: reason });
           const updatedPost = await post.save();
           return updatedPost;
         } else {

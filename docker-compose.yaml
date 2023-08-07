@@ -1,0 +1,18 @@
+version: "3"
+services:
+  client:
+    image: client
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_OPTIONS: "--max_old_space_size=4096"
+    depends_on:
+      - server
+
+  server:
+    image: server
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_OPTIONS: "--max_old_space_size=4096"
+      MONGO_URI: mongodb+srv://mohammedriyazriyaz04:7b7z0wpEFRslnCSD@cluster0.balviqn.mongodb.net/

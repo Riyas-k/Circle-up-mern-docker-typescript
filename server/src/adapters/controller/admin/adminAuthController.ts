@@ -15,13 +15,21 @@ const adminAuthController = (
   const dbAdminRepository = adminDbInterface(adminDbService());
   const adminAuthServices = AdminAuthServiceInterface(adminAuthService());
   const loginAdmin = AsyncHandler(async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    const admin = { email, password };
-    const data = await checkAdmin(admin, dbAdminRepository, adminAuthServices);
-    if (data.status) {
-      res.json({ status: true, data });
-    } else {
-      res.json({ status: false });
+    try {
+      const { email, password } = req.body;
+      const admin = { email, password };
+      const data = await checkAdmin(
+        admin,
+        dbAdminRepository,
+        adminAuthServices
+      );
+      if (data.status) {
+        res.json({ status: true, data });
+      } else {
+        res.json({ status: false });
+      }
+    } catch (error) {
+      console.log(error);
     }
   });
 

@@ -2,13 +2,25 @@ import { AuthServicesReturn } from "../../../framework/services/user/userAuthSer
 
 export const AuthServiceInterface = (service: AuthServicesReturn) => {
   const encryptPassword = async (password: string) => {
-    return await service.encryptPassword(password);
+    try {
+      return await service.encryptPassword(password);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const generateToken = async (userId: string) => {
-    return service.generateToken(userId);
+    try {
+      return service.generateToken(userId);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const comparePassword = async (password: string, bodyPassword: string) => {
-    return await service.comparePassword(password, bodyPassword);
+    try {
+      return await service.comparePassword(password, bodyPassword);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return {
     encryptPassword,

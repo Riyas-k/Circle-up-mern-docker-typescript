@@ -28,10 +28,10 @@ const Friend = ({
   const main = palette.neutral.main;
   const medium = palette.neutral.medium;
   const [user, setUser] = useState([]);
-  const userId = useSelector((store) => store.user?.payload?.userExist._id);
+  const userId = useSelector((store) => store.user.payload.userExist._id);
   const [openDialog, setOpenDialog] = useState(false);
 
-  const isFollowingData = useSelector((store) => store?.follow?.following);
+  const isFollowingData = useSelector((store) => store.follow.following);
   const following = isFollowingData?.find(
     (following) => following._id === friendId
   );
@@ -71,7 +71,6 @@ const Friend = ({
   const handleConfirmUnfollow = async () => {
     handleCloseDialog();
     await axios.put(`/${userId}/unFollow`, { id: friendId }).then((res) => {
-      console.log(res, "jo");
       if (res.data) {
         dispatch(followLoading());
       }

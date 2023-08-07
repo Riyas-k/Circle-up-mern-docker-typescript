@@ -15,7 +15,6 @@ import { io } from "socket.io-client";
 import { clearUser } from "../../redux/singlereducer";
 
 const Profile = ({block}) => {
-  console.log(block,'profile blck');
   const dispatch = useDispatch();
   const navigate = useNavigate()
   useEffect(()=>{
@@ -109,8 +108,7 @@ const Profile = ({block}) => {
             flexBasis={isNotMobile ? "42%" : undefined}
             mt={checkId && isNotMobile ? "-0rem" : "-2rem"}
           >
-            {" "}
-            {checkId && <MyPostWidget dp={dp} details={details} />}
+            {checkId && userId ==data?._id && <MyPostWidget dp={dp} details={details} isProfile={isProfile}/>}
             <Box m="2rem 0" />
             {/* pass the userId as props */}
             <PostsWidget isProfile={isProfile} userId={userId} dp={dp} socket={socket} />

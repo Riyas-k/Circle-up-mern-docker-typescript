@@ -52,9 +52,9 @@ const Chat = () => {
     };
     getChats();
   
-  }, [user?._id]);
+  }, [user._id]);
   const checkOnlineStatus = (chat) => {
-    const chatMember = chat.members.find((member) => member != user._id);
+    const chatMember = chat?.members.find((member) => member != user._id);
     const online = onlineUsers.find((user) => user.userId == chatMember);
     return online ? true : false;
   };
@@ -67,7 +67,7 @@ const Chat = () => {
           <div className="Left-side-chat">
             <h5>Chats</h5>
             <div className="Chat-list">
-              {chats.map((chat) => {
+              {chats?.map((chat) => {
                 console.log(chat,'inside loop');
                 return (
                   // eslint-disable-next-line react/jsx-key

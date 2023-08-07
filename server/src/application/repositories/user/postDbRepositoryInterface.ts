@@ -9,44 +9,84 @@ export const postRepository = (
     image: string,
     userName: string
   ) => {
-    return repository.addPostDetails(userId, text, image, userName);
+    try {
+      return repository.addPostDetails(userId, text, image, userName);
+    } catch (error) {
+      console.log(error);
+    }
   };
-  const fetchPosts = async (userId:string) => {
-    return repository.getPosts(userId);
+  const fetchPosts = async (userId: string) => {
+    try {
+      return repository.getPosts(userId);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const fetchUserPosts = async (userId: string) => {
-    return repository.fetchUserPost(userId);
+    try {
+      return repository.fetchUserPost(userId);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const deletePost = async (postId: string) => {
-    return repository.postDelete(postId);
+    try {
+      return repository.postDelete(postId);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const editPost = async (postId: string, text: string) => {
-    return repository.postEdit(postId, text);
+    try {
+      return repository.postEdit(postId, text);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const likePost = async (postId: string, userId: string) => {
-    return repository.postLike(postId, userId);
+    try {
+      return repository.postLike(postId, userId);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const unLikePost = async (postId: string, userId: string) => {
-    return repository.unLike(postId, userId);
+    try {
+      return repository.unLike(postId, userId);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const addComment = async (
     postId: string,
     userId: string,
     comment: string,
-    firstName:string
+    firstName: string
   ) => {
-    return repository.putComment(postId, userId, comment,firstName);
+    try {
+      return repository.putComment(postId, userId, comment, firstName);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const deleteComment = async (
     postId: string,
     userId: string,
     index: number
   ) => {
-    return repository.postDeleteComment(postId, userId, index);
+    try {
+      return repository.postDeleteComment(postId, userId, index);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const reportPost = async (postId: string, userId: string, reason: string) => {
-    return repository.addReport(postId,userId,reason)
+    try {
+      return repository.addReport(postId, userId, reason);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return {
     addPost,

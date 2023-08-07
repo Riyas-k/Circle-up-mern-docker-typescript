@@ -7,37 +7,53 @@ export const putData = async (
   userName: string,
   postDbRepository: ReturnType<postDbInterface>
 ) => {
-  const data: any = await postDbRepository.addPost(
-    userId,
-    text,
-    image,
-    userName
-  );
-  //    console.log(data,'data');
-  return data;
+  try {
+    const data: any = await postDbRepository.addPost(
+      userId,
+      text,
+      image,
+      userName
+    );
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-export const postData = async (userId:string,
+export const postData = async (
+  userId: string,
   postDbRepository: ReturnType<postDbInterface>
 ) => {
-  const data: any = await postDbRepository.fetchPosts(userId);
-  return data;
+  try {
+    const data: any = await postDbRepository.fetchPosts(userId);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const dataUserPosts = async (
   userId: string,
   postDbRepository: ReturnType<postDbInterface>
 ) => {
-  const data: any = await postDbRepository.fetchUserPosts(userId);
-  return data;
+  try {
+    const data: any = await postDbRepository.fetchUserPosts(userId);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const postDelete = async (
   postId: string,
   postDbRepository: ReturnType<postDbInterface>
 ) => {
-  const data: any = await postDbRepository.deletePost(postId);
-  return data;
+  try {
+    const data: any = await postDbRepository.deletePost(postId);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const postEdit = async (
@@ -45,8 +61,12 @@ export const postEdit = async (
   text: string,
   postDbRepository: ReturnType<postDbInterface>
 ) => {
-  await postDbRepository.editPost(postId, text);
-  return true;
+  try {
+    await postDbRepository.editPost(postId, text);
+    return true;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const putLike = async (
@@ -79,11 +99,16 @@ export const putComment = async (
   postId: string,
   userId: string,
   comment: string,
-  firstName:string,
+  firstName: string,
   postDbRepository: ReturnType<postDbInterface>
 ) => {
   try {
-    const data = await postDbRepository.addComment(postId, userId, comment,firstName);
+    const data = await postDbRepository.addComment(
+      postId,
+      userId,
+      comment,
+      firstName
+    );
     return data;
   } catch (error) {
     console.log(error);
@@ -103,11 +128,16 @@ export const deletePostComment = async (
   }
 };
 
-export const addReport =async(postId:string,userId:string,reason:string, postDbRepository: ReturnType<postDbInterface>)=>{
-   try {
-       const data = await postDbRepository.reportPost(postId,userId,reason)
-       return data
-   } catch (error) {
-       console.log(error);
-   }
-}
+export const addReport = async (
+  postId: string,
+  userId: string,
+  reason: string,
+  postDbRepository: ReturnType<postDbInterface>
+) => {
+  try {
+    const data = await postDbRepository.reportPost(postId, userId, reason);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};

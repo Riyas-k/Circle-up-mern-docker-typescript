@@ -20,19 +20,19 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [receiver, setReceiver] = useState(null);
-  const user = useSelector((store) => store.user?.payload.userExist);
+  const user = useSelector((store) => store.user.payload?.userExist);
   const dispatch = useDispatch();
 
   const handleMessage = async (newMessage) => {
     setNewMessage(newMessage);
   };
   useEffect(() => {
-    if (receivedMessage !== null && receivedMessage?.chatId == chat?._id) {
+    if (receivedMessage !== null && receivedMessage.chatId == chat._id) {
       setMessages([...messages, receivedMessage]);
     }
   }, [receivedMessage]);
   useEffect(() => {
-    const userId = chat?.members?.find((id) => id !== currentUser);
+    const userId = chat?.members.find((id) => id !== currentUser);
     const getUserData = async () => {
       try {
         const data = await axios.get(`/${userId}`);
@@ -47,15 +47,14 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const data = await axios.get(`message/${chat?._id}`);
-        setMessages(data?.data?.messages);
+        const data = await axios.get(`message/${chat._id}`);
+        setMessages(data.data.messages);
       } catch (error) {
         console.log(error);
       }
     };
-    console.log(chat, "pls keri");
     if (chat != null) fetchMessages();
-  }, [chat]);
+  }, [chat,currentUser]);
 
   useEffect(() => {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,7 +66,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
     const message = {
       senderId: currentUser,
       message: e.message ? e.message : newMessage,
-      chatId: chat?._id,
+      chatId: chat._id,
     };
 
     const receiverId = chat?.members?.find((id) => id !== currentUser);
@@ -76,7 +75,7 @@ const ChatBox = ({ chat, currentUser, setSendMessage, receivedMessage }) => {
     try {
       const data = await axios.post("/message", message);
       if (data) {
-        setMessages([...messages, data?.data?.messages]);
+        setMessages([...messages, data.data?.messages]);
         setNewMessage("");
         dispatch(setChatLoading());
       }

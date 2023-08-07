@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 import React from "react";
 import { set } from "lodash";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { useNavigate } from "react-router-dom";
@@ -146,6 +146,7 @@ const AdminHome = () => {
   const handleNavigate = (link) => {
     navigate(link);
   };
+  const mode = useSelector((store)=>store.theme.mode)
 
   return (
     <>
@@ -202,7 +203,7 @@ const AdminHome = () => {
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <Typography
                   variant="h6"
-                  style={{ fontSize: 18, fontWeight: "bold", color: "#FFFFFF" }}
+                  style={{ fontSize: 18, fontWeight: "bold", color: mode === "light" ? "black" : "white",paddingTop:'5px' }}
                 >
                   Users Registration per Day
                 </Typography>
@@ -241,7 +242,7 @@ const AdminHome = () => {
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <Typography
                   variant="h6"
-                  style={{ fontSize: 18, fontWeight: "bold", color: "#FFFFFF" }}
+                  style={{ fontSize: 18, fontWeight: "bold", color: mode === "light" ? "black" : "white",paddingTop:'5px' }}
                 >
                   Number of Posts per Day
                 </Typography>

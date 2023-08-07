@@ -210,6 +210,7 @@ const UserWidget = ({ userId, checkId, isProfile,details }) => {
       <FlexBetween
         gap="0.5rem"
         pb="1.1rem"
+       
         // onClick={() => navigate(`/profile/`)}
       >
         <FlexBetween
@@ -251,15 +252,7 @@ const UserWidget = ({ userId, checkId, isProfile,details }) => {
               flexDirection: "column",
               alignItems: "center",
             }}
-          >
-            {/* {
-              currentId !== userId ?
-              <Button variant='outlined' onClick={{}}>
-              { following  ? "Unfollow" : "Follow" }
-            </Button>
-            : null
-            } */}
-           
+          >         
             {following?._id && userId  && (
               <Button
                 variant='outlined'
@@ -272,7 +265,7 @@ const UserWidget = ({ userId, checkId, isProfile,details }) => {
             )}
           </Box>
         )}
-        {checkId && (
+        { checkId && currentId==userId   && (
           <ManageAccountsOutlined
             sx={{ cursor: "pointer" }}
             onClick={handleOpenModal}

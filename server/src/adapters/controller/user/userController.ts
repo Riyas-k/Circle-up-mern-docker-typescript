@@ -4,7 +4,6 @@ import { UserDbInterface } from "../../../application/repositories/user/userRepo
 import { userRepositoryMongoDB } from "../../../framework/database/mongodb/repositories/user/userAuthRepositoryImp";
 import {
   blockCurrUser,
-  getUserFetch,
   getAllUsers,
   getUserData,
   unBlockCurrUser,
@@ -26,15 +25,16 @@ const userControllers = (
   const blockUser = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
     const status = await blockCurrUser(userId, dbRepositoryUser);
-    console.log(status, "===");
     res.json({ status });
   });
   const unBlockUser = asyncHandler(async (req: Request, res: Response) => {
-    const { userId } = req.params;
-    const status = await unBlockCurrUser(userId, dbRepositoryUser);
-    // const data = await getUserData(userId,dbRepositoryUser)
-    // console.log(data);
-    res.json({ status });
+    try {
+      const { userId } = req.params;
+      const status = await unBlockCurrUser(userId, dbRepositoryUser);
+      res.json({ status });
+    } catch (error) {
+      console.log(error);
+    }
   });
   const viewAllPosts = asyncHandler(async (req: Request, res: Response) => {
     try {
@@ -63,16 +63,15 @@ const userControllers = (
       console.log(error);
     }
   });
-  const confirmReport = asyncHandler(async(req:Request,res:Response)=>{
+  const confirmReport = asyncHandler(async (req: Request, res: Response) => {
     try {
-      const {postId} = req.params
-       const data = await reportConfirm(postId,dbRepositoryUser)
-       res.json({status:true})
+      const { postId } = req.params;
+      const data = await reportConfirm(postId, dbRepositoryUser);
+      res.json({ status: true });
     } catch (error) {
       console.log(error);
     }
-  })
-
+  });
 
   return {
     getUsers,

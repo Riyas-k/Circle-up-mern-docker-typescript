@@ -10,47 +10,70 @@ export const userRepositoryMongoDB = () => {
     email?: string;
     password?: string;
   }) => {
-    const newUser = new User(user);
-    return await newUser.save();
+    try {
+      const newUser = new User(user);
+      return await newUser.save().then(user=>JSON.parse(JSON.stringify(user)))
+    } catch (error) {
+      console.log(error);
+    }
   };
   const getUserByEmail = async (email: string) => {
-    const user: any = await User.findOne({ email: email });
-    return user;
+    try {
+      const user: any = await User.findOne({ email: email });
+      return user;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const getUserValid = async (email: string) => {
-    const user: any = await User.findOne({ email: email });
+    try {
+      const user: any = await User.findOne({ email: email });
 
-    return user;
+      return user;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const getAllUsers = async () => {
-    const users: any = await User.find();
-    return users;
+    try {
+      const users: any = await User.find();
+      return users;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const blockCurrUser = async (userId: string) => {
-    const status: any = await User.findOneAndUpdate(
-      { _id: userId },
-      { $set: { isBlock: true } },
-      { new: true }
-    );
-    return status;
+    try {
+      const status: any = await User.findOneAndUpdate(
+        { _id: userId },
+        { $set: { isBlock: true } },
+        { new: true }
+      );
+      return status;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const unBlockCurrUser = async (userId: string) => {
-    const status: any = await User.findOneAndUpdate(
-      { _id: userId },
-      { $set: { isBlock: false } },
-      { new: true }
-    );
+    try {
+      const status: any = await User.findOneAndUpdate(
+        { _id: userId },
+        { $set: { isBlock: false } },
+        { new: true }
+      );
 
-    return status;
+      return status;
+    } catch (error) {
+      console.log(error);
+    }
   };
   const newUserGoogle = async (user: {
     email: string;
     photoURL: string;
     displayName: string;
   }) => {
-    console.log(user);
-    const { email, photoURL, displayName } = user;
     try {
+      const { email, photoURL, displayName } = user;
       const newUser = new User({
         UserName: displayName,
         email: email,
@@ -64,7 +87,7 @@ export const userRepositoryMongoDB = () => {
   const getUserData = async (userId: string) => {
     try {
       const data = await User.findOne({ _id: userId });
-      console.log(data, "+++++++++++++");
+
       return data;
     } catch (error) {
       console.log(error);
@@ -286,25 +309,24 @@ export const userRepositoryMongoDB = () => {
     try {
       const reportedPosts = await Post.find({
         report: { $exists: true, $not: { $size: 0 } }, // $exists checks if the field exists, $not: { $size: 0 } checks if the array size is not 0
-       
       });
-      console.log(reportedPosts,'posts');
-      return reportedPosts
+      return reportedPosts;
     } catch (error) {
       console.log(error);
     }
   };
-  const  reportConfirm = async(postId:string)=>{
+  const reportConfirm = async (postId: string) => {
     try {
-       const post = await Post.findById(postId);
-       if(!post) {return};
-       post.adminDeleted = true;
-      return   await post.save()
-     
+      const post = await Post.findById(postId);
+      if (!post) {
+        return;
+      }
+      post.adminDeleted = true;
+      return await post.save();
     } catch (error) {
-     console.log(error); 
+      console.log(error);
     }
-  }
+  };
   return {
     addUser,
     fetchPosts,
@@ -329,7 +351,7 @@ export const userRepositoryMongoDB = () => {
     getUserProfile,
     addFollower,
     getReportedPosts,
-    reportConfirm
+    reportConfirm,
   };
 };
 

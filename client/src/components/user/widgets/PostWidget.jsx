@@ -20,6 +20,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Pagination,
   Popover,
   TextField,
   Typography,
@@ -51,7 +52,7 @@ const PostWidget = ({
   postCreatedAt,
   name,
   dp,
-  description,
+  description,postsPerPage = 3,
   userName,
   image,
   likes,
@@ -216,6 +217,7 @@ const PostWidget = ({
       return () => clearTimeout(timer);
     }
   }, [error]);
+  
   return (
     <WidgetWrapper m="2rem 0">
       {error && (
