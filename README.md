@@ -54,7 +54,7 @@ Clone the repository:
 
 bash
 Copy code
-git clone https://github.com/your-username/circle-up.git
+git clone https://github.com/Riyazo4/Circle-up/
 Navigate to the project directory:
 
 bash
@@ -106,7 +106,7 @@ docker-compose up -d
 Open your web browser and navigate to http://localhost to access the Dockerized Circle-Up application.
 
 Contributors
-Your Name (YourEmail@example.com)
-Other contributors...
+Your Name Riyas Email: mohammedriyazriyaz04@gmail.com
+
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
